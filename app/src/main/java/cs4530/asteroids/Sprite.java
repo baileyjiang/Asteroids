@@ -37,6 +37,7 @@ public class Sprite {
     private float translateY = 0.0f;
     private float scaleX = 1.0f;
     private float scaleY = 1.0f;
+    private float angle = 0.0f;
     private Bitmap texture = null;
     private int textureName = -1;
 
@@ -45,6 +46,7 @@ public class Sprite {
     private static int translateUniformLocation = -1;
     private static int scaleUniformLocation = -1;
     private static int textureUnitUniformLocation = -1;
+    private static int angleUniformLocation = -1;
 
     private static final int POSITION_ARRAY = 0;
     private static final int TEXTURE_COORDINATE_ARRAY = 1;
@@ -92,13 +94,13 @@ public class Sprite {
         this.texture = texture;
     }
 
-//    public float getRotation() {
-//        return 0.0f;
-//    }
-//
-//    public void setRotation(float theta) {
-//
-//    }
+    public float getRotation() {
+        return angle;
+    }
+
+    public void setRotation(float theta) {
+        angle = theta;
+    }
 
 
     private static void setup() {
@@ -108,11 +110,15 @@ public class Sprite {
                 "attribute vec2 textureCoordinate;\n" +
                 "uniform vec2 translate;\n" +
                 "uniform vec2 scale;\n" +
+                "uniform float angle;\n" +
                 "varying vec2 textureCoordinateInterpolated; \n" +
                 "\n" +
                 "\n" +
                 "void main() {\n" +
-                "   gl_Position = vec4(position.x * scale.x + translate.x, position.y * scale.y + translate.y, 0.0, 1.0);\n" +
+//                "   gl_Position = vec4(position.x * scale.x + translate.x, position.y * scale.y + translate.y, 0.0, 1.0);\n" +
+
+                "   gl_Position = vec4(((position.x * scale.x + translate.x) * cos(angle)) - ((position.y * scale.y + translate.y) * sin(angle))," +
+                " ((position.x * scale.x + translate.x) * sin(angle)) + ((position.y * scale.y + translate.y) * cos(angle)), 0.0, 1.0);\n" +
                 "   textureCoordinateInterpolated = textureCoordinate; \n" +
                 "}\n" +
                 "\n" +
@@ -177,6 +183,7 @@ public class Sprite {
         translateUniformLocation = GLES20.glGetUniformLocation(program, "translate");
         scaleUniformLocation = GLES20.glGetUniformLocation(program, "scale");
         textureUnitUniformLocation = GLES20.glGetUniformLocation(program, "textureUnit");
+        angleUniformLocation = GLES20.glGetUniformLocation(program, "angle");
 
         GLES20.glEnable(GLES20.GL_TEXTURE_2D);
 
@@ -195,6 +202,7 @@ public class Sprite {
         GLES20.glUniform2f(translateUniformLocation, translateX, translateY);
         GLES20.glUniform2f(scaleUniformLocation, scaleX, scaleY);
         GLES20.glUniform1i(textureUnitUniformLocation, 0);
+        GLES20.glUniform1f(angleUniformLocation, angle);
 
         if (textureName <= 0) {
             int[] textureNames = new int[1];

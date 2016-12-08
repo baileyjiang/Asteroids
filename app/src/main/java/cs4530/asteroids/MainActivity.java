@@ -6,6 +6,8 @@ import android.opengl.GLSurfaceView;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.view.MotionEvent;
+import android.view.View;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +15,7 @@ import java.util.List;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-public class MainActivity extends AppCompatActivity implements GLSurfaceView.Renderer {
+public class MainActivity extends AppCompatActivity implements GLSurfaceView.Renderer, View.OnTouchListener {
 
     List<Sprite> sprites = new ArrayList<>();
 
@@ -25,6 +27,7 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         surfaceView.setEGLContextClientVersion(2);
         surfaceView.setEGLConfigChooser(8, 8, 8, 8, 0, 0);
         surfaceView.setRenderer(this);
+        surfaceView.setOnTouchListener(this);
         setContentView(surfaceView);
 
         DisplayMetrics metrics = getResources().getDisplayMetrics();
@@ -71,6 +74,14 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         shoot.setCenterY(-0.85f);
         shoot.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.bullet));
         sprites.add(shoot);
+
+
+        Sprite ship = new Sprite();
+        ship.setWidth(0.25f * ratio);
+        ship.setHeight(0.25f);
+//        ship.setRotation(0.2f);
+        ship.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.spaceship));
+        sprites.add(ship);
     }
 
     @Override
@@ -96,5 +107,17 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
             sprite.draw();
         }
 
+    }
+
+    @Override
+    public boolean onTouch(View view, MotionEvent motionEvent) {
+
+        Sprite right = sprites.get(0);
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        float x = motionEvent.getX();
+        float centerX = (right.getCenterX() + 0.5f) * metrics.widthPixels;
+        float width = right.getWidth() * metrics.widthPixels;
+        boolean hit = x >= centerX - width/2 && x <= centerX + width/2;
+        return true;
     }
 }
