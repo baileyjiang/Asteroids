@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
+import android.opengl.Matrix;
 import android.util.Log;
 
 import java.nio.ByteBuffer;
@@ -37,7 +38,8 @@ public class Sprite {
     private float translateY = 0.0f;
     private float scaleX = 1.0f;
     private float scaleY = 1.0f;
-    private float angle = 0.0f;
+    private float angle = 0.5f;
+    private float[] rotateMatrix = new float[16];
     private Bitmap texture = null;
     private int textureName = -1;
 
@@ -47,6 +49,7 @@ public class Sprite {
     private static int scaleUniformLocation = -1;
     private static int textureUnitUniformLocation = -1;
     private static int angleUniformLocation = -1;
+    private static int rotateMatrixUniformLocation = -1;
 
     private static final int POSITION_ARRAY = 0;
     private static final int TEXTURE_COORDINATE_ARRAY = 1;
@@ -111,14 +114,17 @@ public class Sprite {
                 "uniform vec2 translate;\n" +
                 "uniform vec2 scale;\n" +
                 "uniform float angle;\n" +
+                "uniform mat4 matrix;\n" +
                 "varying vec2 textureCoordinateInterpolated; \n" +
                 "\n" +
                 "\n" +
                 "void main() {\n" +
-//                "   gl_Position = vec4(position.x * scale.x + translate.x, position.y * scale.y + translate.y, 0.0, 1.0);\n" +
+                "   gl_Position = matrix * vec4(position.x * scale.x + translate.x, position.y * scale.y + translate.y, 0.0, 1.0);\n" +
 
-                "   gl_Position = vec4(((position.x * scale.x + translate.x) * cos(angle)) - ((position.y * scale.y + translate.y) * sin(angle))," +
-                " ((position.x * scale.x + translate.x) * sin(angle)) + ((position.y * scale.y + translate.y) * cos(angle)), 0.0, 1.0);\n" +
+//                "   gl_Position = vec4(((position.x * scale.x + translate.x) * cos(angle)) - ((position.y * scale.y + translate.y) * sin(angle))," +
+//                " ((position.x * scale.x + translate.x) * sin(angle)) + ((position.y * scale.y + translate.y) * cos(angle)), 0.0, 1.0);\n" +
+//                "   gl_Position = vec4(((position.x * cos(angle) * scale.x + translate.x)) - ((position.y * sin(angle) * scale.y + translate.y))," +
+//                " ((position.x * sin(angle) * scale.x + translate.x)) + ((position.y * cos(angle) * scale.y + translate.y)), 0.0, 1.0);\n" +
                 "   textureCoordinateInterpolated = textureCoordinate; \n" +
                 "}\n" +
                 "\n" +
@@ -184,6 +190,7 @@ public class Sprite {
         scaleUniformLocation = GLES20.glGetUniformLocation(program, "scale");
         textureUnitUniformLocation = GLES20.glGetUniformLocation(program, "textureUnit");
         angleUniformLocation = GLES20.glGetUniformLocation(program, "angle");
+        rotateMatrixUniformLocation = GLES20.glGetUniformLocation(program, "matrix");
 
         GLES20.glEnable(GLES20.GL_TEXTURE_2D);
 
@@ -199,10 +206,14 @@ public class Sprite {
             setup();
         }
 
+        Matrix.setRotateM(rotateMatrix, 0, angle, 0, 0, 1.0f);
+
         GLES20.glUniform2f(translateUniformLocation, translateX, translateY);
         GLES20.glUniform2f(scaleUniformLocation, scaleX, scaleY);
         GLES20.glUniform1i(textureUnitUniformLocation, 0);
         GLES20.glUniform1f(angleUniformLocation, angle);
+        GLES20.glUniformMatrix4fv(rotateMatrixUniformLocation, 1, false, rotateMatrix, 0);
+
 
         if (textureName <= 0) {
             int[] textureNames = new int[1];

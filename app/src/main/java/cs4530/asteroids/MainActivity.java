@@ -6,6 +6,7 @@ import android.opengl.GLSurfaceView;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -80,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         ship.setWidth(0.25f * ratio);
         ship.setHeight(0.25f);
 //        ship.setRotation(0.2f);
-        ship.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.spaceship));
+        ship.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.texture));
         sprites.add(ship);
     }
 
@@ -112,12 +113,27 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
 
-        Sprite right = sprites.get(0);
+        Sprite ship = sprites.get(4);
+
+        Sprite rightArrow = sprites.get(0);
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         float x = motionEvent.getX();
-        float centerX = (right.getCenterX() + 0.5f) * metrics.widthPixels;
-        float width = right.getWidth() * metrics.widthPixels;
+        float centerX = (rightArrow.getCenterX() + 0.5f) * metrics.widthPixels;
+        float width = rightArrow.getWidth() * metrics.widthPixels;
         boolean hit = x >= centerX - width/2 && x <= centerX + width/2;
-        return true;
+        if (hit) {
+            Log.i("EVENT: ", "here");
+//            boolean flag = false;
+//            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+//                flag = true;
+//            }
+//            if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+//                flag = false;
+//            }
+//            while (flag) {
+                ship.setRotation(ship.getRotation() + 0.05f);
+//            }
+        }
+        return hit;
     }
 }
