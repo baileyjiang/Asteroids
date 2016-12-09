@@ -20,10 +20,19 @@ public class Sprite {
 
     // Create quad
     private static final float[] quadGeometry = {
+//            -0.5f, -0.5f,
+//            0.5f, -0.5f,
+//            -0.5f, 0.5f,
+//            0.5f, 0.5f,
+
             -0.5f, -0.5f,
             0.5f, -0.5f,
             -0.5f, 0.5f,
             0.5f, 0.5f,
+
+
+//            0.5f, 0.5f5f,
+
     };
 
     //interpolated color
@@ -38,8 +47,11 @@ public class Sprite {
     private float translateY = 0.0f;
     private float scaleX = 1.0f;
     private float scaleY = 1.0f;
-    private float angle = 0.5f;
+    private float angle = 0.0f;
     private float[] rotateMatrix = new float[16];
+    private float[] projectionMatrix = new float[16];
+    private float[] viewMatrix = new float[16];
+    private float[] MVPMatrix = new float[16];
     private Bitmap texture = null;
     private int textureName = -1;
 
@@ -120,9 +132,22 @@ public class Sprite {
                 "\n" +
                 "void main() {\n" +
                 "   gl_Position = matrix * vec4(position.x * scale.x + translate.x, position.y * scale.y + translate.y, 0.0, 1.0);\n" +
+//                "   gl_Position = matrix * vec4(position.x * scale.x, position.y * scale.y, 0.0, 1.0);\n" +
+//                "   gl_Position = matrix * vec4(position.x, position.y, 0.0, 1.0);\n" +
+
+//                "   gl_Position = matrix * vec4(position.x, position.y, 0.0, 1.0); \n" +
+
+//                "   gl_Position = vec4(position.x, position.y, 0.0, 1.0) * matrix;\n" +
+
 
 //                "   gl_Position = vec4(((position.x * scale.x + translate.x) * cos(angle)) - ((position.y * scale.y + translate.y) * sin(angle))," +
 //                " ((position.x * scale.x + translate.x) * sin(angle)) + ((position.y * scale.y + translate.y) * cos(angle)), 0.0, 1.0);\n" +
+//
+//                "   gl_Position = vec4(((position.x * scale.x + translate.x) * cos(angle)) - ((position.y * scale.y + translate.y) * sin(angle))," +
+//                " ((position.x * scale.x + translate.x) * sin(angle)) + ((position.y * scale.y + translate.y) * cos(angle)), 0.0, 1.0);\n" +
+
+//
+//
 //                "   gl_Position = vec4(((position.x * cos(angle) * scale.x + translate.x)) - ((position.y * sin(angle) * scale.y + translate.y))," +
 //                " ((position.x * sin(angle) * scale.x + translate.x)) + ((position.y * cos(angle) * scale.y + translate.y)), 0.0, 1.0);\n" +
                 "   textureCoordinateInterpolated = textureCoordinate; \n" +
@@ -200,19 +225,31 @@ public class Sprite {
         setup = true;
     }
 
+    public void setupProjections(float ratio) {
+        Matrix.frustumM(projectionMatrix, 0, -ratio, ratio, -1, 1, 3, 7);
+    }
+
     public void draw() {
 
         if (!setup) {
             setup();
         }
 
+        Matrix.setLookAtM(viewMatrix, 0, 0, 0, 3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+        Matrix.multiplyMM(MVPMatrix, 0, projectionMatrix, 0, viewMatrix, 0);
+
+
         Matrix.setRotateM(rotateMatrix, 0, angle, 0, 0, 1.0f);
+//        Matrix.scaleM(rotateMatrix);
+        float[] matrixToUse = new float[16];
+        Matrix.multiplyMM(matrixToUse, 0, MVPMatrix, 0, rotateMatrix, 0);
+
 
         GLES20.glUniform2f(translateUniformLocation, translateX, translateY);
         GLES20.glUniform2f(scaleUniformLocation, scaleX, scaleY);
         GLES20.glUniform1i(textureUnitUniformLocation, 0);
         GLES20.glUniform1f(angleUniformLocation, angle);
-        GLES20.glUniformMatrix4fv(rotateMatrixUniformLocation, 1, false, rotateMatrix, 0);
+        GLES20.glUniformMatrix4fv(rotateMatrixUniformLocation, 1, false, matrixToUse, 0);
 
 
         if (textureName <= 0) {

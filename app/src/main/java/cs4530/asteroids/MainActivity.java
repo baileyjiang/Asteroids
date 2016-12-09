@@ -19,6 +19,7 @@ import javax.microedition.khronos.opengles.GL10;
 public class MainActivity extends AppCompatActivity implements GLSurfaceView.Renderer, View.OnTouchListener {
 
     List<Sprite> sprites = new ArrayList<>();
+    float ratio = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,7 +33,7 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         setContentView(surfaceView);
 
         DisplayMetrics metrics = getResources().getDisplayMetrics();
-        float ratio = ((float)metrics.heightPixels / (float)metrics.widthPixels);
+        ratio = ((float)metrics.heightPixels / (float)metrics.widthPixels);
 
 
 //        Sprite sprite = new Sprite();
@@ -45,43 +46,43 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
 
 
         Sprite rightArrow = new Sprite();
-        rightArrow.setWidth(0.25f * ratio);
+        rightArrow.setWidth(0.25f);
         rightArrow.setHeight(0.25f);
-        rightArrow.setCenterX(-0.25f);
+        rightArrow.setCenterX(-0.75f / ratio);
         rightArrow.setCenterY(-0.85f);
         rightArrow.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.transparent_arrow_right));
         sprites.add(rightArrow);
 
         Sprite leftArrow = new Sprite();
-        leftArrow.setWidth(0.25f * ratio);
+        leftArrow.setWidth(0.25f);
         leftArrow.setHeight(0.25f);
-        leftArrow.setCenterX(-0.75f);
+        leftArrow.setCenterX(-0.25f / ratio);
         leftArrow.setCenterY(-0.85f);
         leftArrow.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.transparent_arrow_left));
         sprites.add(leftArrow);
 
         Sprite upArrow = new Sprite();
-        upArrow.setWidth(0.25f * ratio);
+        upArrow.setWidth(0.25f);
         upArrow.setHeight(0.25f);
-        upArrow.setCenterX(0.25f);
+        upArrow.setCenterX(0.25f / ratio);
         upArrow.setCenterY(-0.85f);
         upArrow.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.transparent_arrow_up));
         sprites.add(upArrow);
 
         Sprite shoot = new Sprite();
-        shoot.setWidth(0.25f * ratio);
+        shoot.setWidth(0.25f);
         shoot.setHeight(0.25f);
-        shoot.setCenterX(0.75f);
+        shoot.setCenterX(0.75f / ratio);
         shoot.setCenterY(-0.85f);
         shoot.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.bullet));
         sprites.add(shoot);
 
 
         Sprite ship = new Sprite();
-        ship.setWidth(0.25f * ratio);
+        ship.setWidth(0.25f);
         ship.setHeight(0.25f);
 //        ship.setRotation(0.2f);
-        ship.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.texture));
+        ship.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.spaceship));
         sprites.add(ship);
     }
 
@@ -92,7 +93,12 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
 
     @Override
     public void onSurfaceChanged(GL10 gl10, int i, int i1) {
+        GLES20.glViewport(0, 0, i, i1);
 
+        float ratio = (float) i / i1;
+        for (Sprite s : sprites) {
+            s.setupProjections(ratio);
+        }
     }
 
     @Override
@@ -116,13 +122,54 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         Sprite ship = sprites.get(4);
 
         Sprite rightArrow = sprites.get(0);
+        Sprite leftArrow = sprites.get(1);
+        Sprite thrust = sprites.get(2);
+        Sprite shoot = sprites.get(3);
+
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         float x = motionEvent.getX();
-        float centerX = (rightArrow.getCenterX() + 0.5f) * metrics.widthPixels;
-        float width = rightArrow.getWidth() * metrics.widthPixels;
-        boolean hit = x >= centerX - width/2 && x <= centerX + width/2;
-        if (hit) {
-            Log.i("EVENT: ", "here");
+        float y = motionEvent.getY();
+
+        float rightArrowCenterY = ((rightArrow.getCenterY() - 1.0f) * -0.5f) * metrics.heightPixels;
+        float rightArrowCenterX = ((rightArrow.getCenterX() * ratio + 1.0f) * 0.5f) * metrics.widthPixels;
+        float rightArrowWidth = rightArrow.getWidth() * metrics.widthPixels;
+        float rightArrowHeight = rightArrow.getHeight() * (metrics.heightPixels);
+
+        float leftArrowCenterY = ((leftArrow.getCenterY() - 1.0f) * -0.5f) * metrics.heightPixels;
+        float leftArrowCenterX = ((leftArrow.getCenterX() * ratio + 1.0f) * 0.5f) * metrics.widthPixels;
+        float leftArrowWidth = leftArrow.getWidth() * metrics.widthPixels;
+        float leftArrowHeight = leftArrow.getHeight() * (metrics.heightPixels);
+
+        float thrustCenterY = ((thrust.getCenterY() - 1.0f) * -0.5f) * metrics.heightPixels;
+        float thrustCenterX = ((thrust.getCenterX() * ratio + 1.0f) * 0.5f) * metrics.widthPixels;
+        float thrustWidth = thrust.getWidth() * metrics.widthPixels;
+        float thrustHeight = thrust.getHeight() * (metrics.heightPixels);
+
+        float shootCenterY = ((shoot.getCenterY() - 1.0f) * -0.5f) * metrics.heightPixels;
+        float shootCenterX = ((shoot.getCenterX() * ratio + 1.0f) * 0.5f) * metrics.widthPixels;
+        float shootWidth = shoot.getWidth() * metrics.widthPixels;
+        float shootHeight = shoot.getHeight() * (metrics.heightPixels);
+
+        boolean rightArrowPress = x >= rightArrowCenterX - rightArrowWidth/2 && x <= rightArrowCenterX + rightArrowWidth/2 && y >= rightArrowCenterY - rightArrowHeight/2 && y <= rightArrowCenterY + rightArrowHeight/2;
+        boolean leftArrowPress = x >= leftArrowCenterX - leftArrowWidth/2 && x <= leftArrowCenterX + leftArrowWidth/2 && y >= leftArrowCenterY - leftArrowHeight/2 && y <= leftArrowCenterY + leftArrowHeight/2;
+        boolean thrustPress = x >= thrustCenterX - thrustWidth/2 && x <= thrustCenterX + thrustWidth/2 && y >= thrustCenterY - thrustHeight/2 && y <= thrustCenterY + thrustHeight/2;
+        boolean shootPress = x >= shootCenterX - shootWidth/2 && x <= shootCenterX + shootWidth/2 && y >= shootCenterY - shootHeight/2 && y <= shootCenterY + shootHeight/2;
+        if (rightArrowPress) {
+            Log.i("EVENT", "rightArrow");
+            ship.setRotation(ship.getRotation() + 45.0f);
+        }
+        if (leftArrowPress) {
+            Log.i("EVENT", "leftArrow");
+            ship.setRotation(ship.getRotation() + 45.0f);
+        }
+        if (thrustPress) {
+            Log.i("EVENT", "thrust");
+            ship.setRotation(ship.getRotation() + 45.0f);
+        }
+        if (shootPress) {
+            Log.i("EVENT", "shoot");
+            ship.setRotation(ship.getRotation() + 45.0f);
+        }
 //            boolean flag = false;
 //            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
 //                flag = true;
@@ -131,9 +178,8 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
 //                flag = false;
 //            }
 //            while (flag) {
-                ship.setRotation(ship.getRotation() + 0.05f);
 //            }
-        }
-        return hit;
+
+        return true;
     }
 }
