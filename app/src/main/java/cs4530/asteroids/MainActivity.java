@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         Sprite rightArrow = new Sprite();
         rightArrow.setWidth(0.25f);
         rightArrow.setHeight(0.25f);
-        rightArrow.setCenterX(-0.75f / ratio);
+        rightArrow.setCenterX(-0.25f / ratio);
         rightArrow.setCenterY(-0.85f);
         rightArrow.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.transparent_arrow_right));
         sprites.add(rightArrow);
@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         Sprite leftArrow = new Sprite();
         leftArrow.setWidth(0.25f);
         leftArrow.setHeight(0.25f);
-        leftArrow.setCenterX(-0.25f / ratio);
+        leftArrow.setCenterX(-0.75f / ratio);
         leftArrow.setCenterY(-0.85f);
         leftArrow.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.transparent_arrow_left));
         sprites.add(leftArrow);
@@ -107,9 +107,6 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         GLES20.glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
-//        Sprite s = sprites.get(0);
-//        s.setCenterX(s.getCenterX() + 0.001f);
-
         for (Sprite sprite : sprites) {
             sprite.draw();
         }
@@ -155,16 +152,37 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         boolean thrustPress = x >= thrustCenterX - thrustWidth/2 && x <= thrustCenterX + thrustWidth/2 && y >= thrustCenterY - thrustHeight/2 && y <= thrustCenterY + thrustHeight/2;
         boolean shootPress = x >= shootCenterX - shootWidth/2 && x <= shootCenterX + shootWidth/2 && y >= shootCenterY - shootHeight/2 && y <= shootCenterY + shootHeight/2;
         if (rightArrowPress) {
-            Log.i("EVENT", "rightArrow");
-            ship.setRotation(ship.getRotation() + 45.0f);
+            Log.i("EVENT", "Starting..");
+            Log.i("EVENT", "Angle: " + ship.getRotation());
+            Log.i("EVENT", "X value: " + ship.getCenterX());
+            Log.i("EVENT", "Y value: " + ship.getCenterY());
+            ship.setRotation(ship.getRotation() - 5.0f);
         }
         if (leftArrowPress) {
-            Log.i("EVENT", "leftArrow");
-            ship.setRotation(ship.getRotation() + 45.0f);
+            Log.i("EVENT", "Starting..");
+            Log.i("EVENT", "Angle: " + ship.getRotation());
+            Log.i("EVENT", "X value: " + ship.getCenterX());
+            Log.i("EVENT", "Y value: " + ship.getCenterY());
+            ship.setRotation(ship.getRotation() + 5.0f);
         }
         if (thrustPress) {
-            Log.i("EVENT", "thrust");
-            ship.setRotation(ship.getRotation() + 45.0f);
+            float tempAngle = ship.getRotation();
+            tempAngle += 90;
+            if (tempAngle >= 360.0f) {
+                tempAngle = tempAngle - 360.0f;
+            }
+            tempAngle = (float) Math.toRadians(tempAngle);
+
+            Log.i("EVENT", "Starting..");
+            Log.i("EVENT", "Angle: " + ship.getRotation());
+            Log.i("EVENT", "X value: " + ship.getCenterX());
+            Log.i("EVENT", "Y value: " + ship.getCenterY());
+            Log.i("EVENT", "temp value: " + tempAngle);
+            Log.i("EVENT", "Adding to X: " + (float) Math.cos((double) tempAngle));
+            Log.i("EVENT", "Adding to Y: " + (float) Math.sin((double) tempAngle));
+//            ship.setRotation(ship.getRotation() + 45.0f);
+            ship.setCenterX(ship.getCenterX() + ((float) Math.cos((double) tempAngle) * 0.1f));
+            ship.setCenterY(ship.getCenterY() + ((float) Math.sin((double) tempAngle) * 0.1f));
         }
         if (shootPress) {
             Log.i("EVENT", "shoot");

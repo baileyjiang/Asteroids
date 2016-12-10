@@ -50,6 +50,7 @@ public class Sprite {
     private float angle = 0.0f;
     private float[] rotateMatrix = new float[16];
     private float[] projectionMatrix = new float[16];
+    private float[] modelMatrix = new float[16];
     private float[] viewMatrix = new float[16];
     private float[] MVPMatrix = new float[16];
     private Bitmap texture = null;
@@ -115,6 +116,12 @@ public class Sprite {
 
     public void setRotation(float theta) {
         angle = theta;
+        if (angle >= 360.0f) {
+            angle = angle - 360.0f;
+        }
+        if (angle < 0.0f) {
+            angle = angle + 360.0f;
+        }
     }
 
 
@@ -131,7 +138,9 @@ public class Sprite {
                 "\n" +
                 "\n" +
                 "void main() {\n" +
-                "   gl_Position = matrix * vec4(position.x * scale.x + translate.x, position.y * scale.y + translate.y, 0.0, 1.0);\n" +
+//                "   gl_Position = matrix * vec4(position.x * scale.x + translate.x, position.y * scale.y + translate.y, 0.0, 1.0);\n" +
+                "   gl_Position = matrix * vec4(position.x * scale.x, position.y * scale.y, 0.0, 1.0);\n" +
+
 //                "   gl_Position = matrix * vec4(position.x * scale.x, position.y * scale.y, 0.0, 1.0);\n" +
 //                "   gl_Position = matrix * vec4(position.x, position.y, 0.0, 1.0);\n" +
 
@@ -234,22 +243,29 @@ public class Sprite {
         if (!setup) {
             setup();
         }
-
+        // The ordering and setup of the matrices references Google's OpenGL ES tutorial at https://developer.android.com/training/graphics/opengl/index.html
+        // and the answer by escalator on Stackoverflow: http://stackoverflow.com/questions/13480043/opengl-es-android-matrix-transformations
         Matrix.setLookAtM(viewMatrix, 0, 0, 0, 3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+
+        Matrix.setIdentityM(modelMatrix, 0);
+        Matrix.translateM(modelMatrix, 0, translateX, translateY, 0);
+
         Matrix.multiplyMM(MVPMatrix, 0, projectionMatrix, 0, viewMatrix, 0);
 
-
         Matrix.setRotateM(rotateMatrix, 0, angle, 0, 0, 1.0f);
-//        Matrix.scaleM(rotateMatrix);
-        float[] matrixToUse = new float[16];
-        Matrix.multiplyMM(matrixToUse, 0, MVPMatrix, 0, rotateMatrix, 0);
+
+        float[] matrixTemp = new float[16];
+        matrixTemp = modelMatrix.clone();
+        Matrix.multiplyMM(modelMatrix, 0, matrixTemp, 0, rotateMatrix, 0);
+        matrixTemp = MVPMatrix.clone();
+        Matrix.multiplyMM(MVPMatrix, 0, matrixTemp, 0, modelMatrix, 0);
 
 
         GLES20.glUniform2f(translateUniformLocation, translateX, translateY);
         GLES20.glUniform2f(scaleUniformLocation, scaleX, scaleY);
         GLES20.glUniform1i(textureUnitUniformLocation, 0);
         GLES20.glUniform1f(angleUniformLocation, angle);
-        GLES20.glUniformMatrix4fv(rotateMatrixUniformLocation, 1, false, matrixToUse, 0);
+        GLES20.glUniformMatrix4fv(rotateMatrixUniformLocation, 1, false, MVPMatrix, 0);
 
 
         if (textureName <= 0) {
