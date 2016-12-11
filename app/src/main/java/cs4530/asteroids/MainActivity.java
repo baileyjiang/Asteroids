@@ -11,6 +11,7 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -18,17 +19,19 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class MainActivity extends AppCompatActivity implements GLSurfaceView.Renderer, View.OnTouchListener {
 
-    List<Sprite> sprites = new ArrayList<>();
+//    List<Sprite> sprites = new ArrayList<>();
     List<Sprite> lasers = new ArrayList<>();
     List<Sprite> asteroids = new ArrayList<>();
     DisplayMetrics metrics = null;
     float ratio = -1;
+    GLSurfaceView surfaceView = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        GLSurfaceView surfaceView = new GLSurfaceView(this);
+
+        surfaceView = new GLSurfaceView(this);
         surfaceView.setEGLContextClientVersion(2);
         surfaceView.setEGLConfigChooser(8, 8, 8, 8, 0, 0);
         surfaceView.setRenderer(this);
@@ -48,45 +51,54 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
 //        sprites.add(sprite);
 
 
-        Sprite rightArrow = new Sprite();
-        rightArrow.setWidth(0.25f);
-        rightArrow.setHeight(0.25f);
-        rightArrow.setCenterX(-0.25f / ratio);
-        rightArrow.setCenterY(-0.85f);
-        rightArrow.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.transparent_arrow_right));
-        sprites.add(rightArrow);
+//        Sprite rightArrow = new Sprite();
+//        rightArrow.setWidth(0.25f);
+//        rightArrow.setHeight(0.25f);
+//        rightArrow.setCenterX(-0.25f / ratio);
+//        rightArrow.setCenterY(-0.85f);
+//        rightArrow.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.transparent_arrow_right));
+//        sprites.add(rightArrow);
+//
+//        Sprite leftArrow = new Sprite();
+//        leftArrow.setWidth(0.25f);
+//        leftArrow.setHeight(0.25f);
+//        leftArrow.setCenterX(-0.75f / ratio);
+//        leftArrow.setCenterY(-0.85f);
+//        leftArrow.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.transparent_arrow_left));
+//        sprites.add(leftArrow);
+//
+//        Sprite upArrow = new Sprite();
+//        upArrow.setWidth(0.25f);
+//        upArrow.setHeight(0.25f);
+//        upArrow.setCenterX(0.25f / ratio);
+//        upArrow.setCenterY(-0.85f);
+//        upArrow.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.transparent_arrow_up));
+//        sprites.add(upArrow);
+//
+//        Sprite shoot = new Sprite();
+//        shoot.setWidth(0.25f);
+//        shoot.setHeight(0.25f);
+//        shoot.setCenterX(0.75f / ratio);
+//        shoot.setCenterY(-0.85f);
+//        shoot.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.bullet));
+//        sprites.add(shoot);
+//
+//
+//        Sprite ship = new Sprite();
+//        ship.setWidth(0.25f);
+//        ship.setHeight(0.25f);
+////        ship.setRotation(0.2f);
+//        ship.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.spaceship));
+//        sprites.add(ship);
 
-        Sprite leftArrow = new Sprite();
-        leftArrow.setWidth(0.25f);
-        leftArrow.setHeight(0.25f);
-        leftArrow.setCenterX(-0.75f / ratio);
-        leftArrow.setCenterY(-0.85f);
-        leftArrow.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.transparent_arrow_left));
-        sprites.add(leftArrow);
-
-        Sprite upArrow = new Sprite();
-        upArrow.setWidth(0.25f);
-        upArrow.setHeight(0.25f);
-        upArrow.setCenterX(0.25f / ratio);
-        upArrow.setCenterY(-0.85f);
-        upArrow.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.transparent_arrow_up));
-        sprites.add(upArrow);
-
-        Sprite shoot = new Sprite();
-        shoot.setWidth(0.25f);
-        shoot.setHeight(0.25f);
-        shoot.setCenterX(0.75f / ratio);
-        shoot.setCenterY(-0.85f);
-        shoot.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.bullet));
-        sprites.add(shoot);
-
-
-        Sprite ship = new Sprite();
-        ship.setWidth(0.25f);
-        ship.setHeight(0.25f);
-//        ship.setRotation(0.2f);
-        ship.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.spaceship));
-        sprites.add(ship);
+//        Sprite z = new Sprite();
+//        z.setWidth(0.25f);
+//        z.setHeight(0.25f);
+//        z.setCenterX(-0.25f / ratio);
+//        z.setCenterY(-0.5f);
+//        z.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.bullet));
+//        lasers.add(z);
+//        sprites.add(z);
     }
 
     @Override
@@ -97,9 +109,15 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
     @Override
     public void onSurfaceChanged(GL10 gl10, int i, int i1) {
         GLES20.glViewport(0, 0, i, i1);
+        List<Sprite> sprites = GameModel.getInstance(this).getBaseSprites();
+        List<Sprite> lasers = GameModel.getInstance(this).getLaserSprites();
+
 
         float ratio = (float) i / i1;
         for (Sprite s : sprites) {
+            s.setupProjections(ratio);
+        }
+        for (Sprite s : lasers) {
             s.setupProjections(ratio);
         }
     }
@@ -108,28 +126,65 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
     public void onDrawFrame(GL10 gl10) {
         // Clear frame first
         GLES20.glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+//        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+        GLES20.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
 
-        sprites.get(4).setCenterX(sprites.get(4).getCenterX() + 0.01f);
-        for (Sprite sprite : sprites) {
-            sprite.draw();
+
+//        sprites.get(4).setCenterX(sprites.get(4).getCenterX() + 0.01f);
+
+//        Sprite z = new Sprite();
+//        z.setWidth(0.25f);
+//        z.setHeight(0.25f);
+//        z.setCenterX(-0.25f / ratio);
+//        z.setCenterY(-0.5f);
+//        z.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.bullet));
+//        z.tag = "123";
+//        GameModel.getInstance(this).addBaseSprite(z);
+//        List<Sprite> sprites = GameModel.getInstance(this).getBaseSprites();
+//        if (sprites.size() > 8) {
+//            Log.i("a", "size: " + sprites.size());
+//        }
+//        Iterator<Sprite> spriteIterator = sprites.iterator();
+//        while (spriteIterator.hasNext()) {
+//            spriteIterator.next().draw();
+//        }
+        GameModel g = GameModel.getInstance(this);
+        for (Sprite s : g.getBaseSprites()) {
+            s.draw();
         }
 
-        for (int i = 0; i < lasers.size(); i++) {
-            Sprite laser = lasers.get(i);
-            float laserY = (((laser.getCenterY() - 1.0f) * -0.5f) * metrics.heightPixels);
-            float laserX = ((laser.getCenterX() * ratio + 1.0f) * 0.5f) * metrics.widthPixels;
-            if (laserY > metrics.heightPixels || laserY < 0
-                    || laserX > metrics.widthPixels || laserX < 0) {
-                lasers.remove(i);
-            } else {
-                laser.draw();
+        for (Sprite laser : g.getLaserSprites()) {
+            float tempAngle = laser.getRotation();
+            tempAngle += 90;
+            if (tempAngle >= 360.0f) {
+                tempAngle = tempAngle - 360.0f;
             }
+            tempAngle = (float) Math.toRadians(tempAngle);
+
+            laser.setCenterX(laser.getCenterX() + ((float) Math.cos((double) tempAngle) * 0.1f));
+            laser.setCenterY(laser.getCenterY() + ((float) Math.sin((double) tempAngle) * 0.1f));
+
+            laser.draw();
         }
+
+//        for (int i = 0; i < lasers.size(); i++) {
+//            Sprite laser = lasers.get(i);
+//            float laserY = (((laser.getCenterY() - 1.0f) * -0.5f) * metrics.heightPixels);
+//            float laserX = ((laser.getCenterX() * ratio + 1.0f) * 0.5f) * metrics.widthPixels;
+////            if (laserY > metrics.heightPixels || laserY < 0
+////                    || laserX > metrics.widthPixels || laserX < 0) {
+////                lasers.remove(i);
+////            } else {
+//                laser.draw();
+////            }
+//        }
     }
 
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
+
+        List<Sprite> sprites = GameModel.getInstance(this).getBaseSprites();
+
 
         Sprite ship = sprites.get(4);
 
@@ -199,22 +254,40 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         }
         if (shootPress) {
 //            Log.i("EVENT", "shoot");
-            Sprite bullet = new Sprite();
-            bullet.setHeight(0.25f);
-            bullet.setWidth(0.25f);
-            float tempAngle = ship.getRotation();
-            bullet.setRotation(tempAngle);
-            tempAngle += 90;
-            if (tempAngle >= 360.0f) {
-                tempAngle = tempAngle - 360.0f;
+//            Sprite bullet = new Sprite();
+//            bullet.setHeight(0.25f);
+//            bullet.setWidth(0.25f);
+            Sprite bullet = GameModel.getInstance(this).getOutOfPositionLaser();
+            if (bullet != null) {
+                bullet.setCenterX(ship.getCenterX());
+                bullet.setCenterY(ship.getCenterY());
+                float tempAngle = ship.getRotation();
+                bullet.setRotation(tempAngle);
+                tempAngle += 90;
+                if (tempAngle >= 360.0f) {
+                    tempAngle = tempAngle - 360.0f;
+                }
+                tempAngle = (float) Math.toRadians(tempAngle);
+
+                bullet.setCenterX(ship.getCenterX() + ((float) Math.cos((double) tempAngle) * 0.1f));
+                bullet.setCenterY(ship.getCenterY() + ((float) Math.sin((double) tempAngle) * 0.1f));
             }
-            tempAngle = (float) Math.toRadians(tempAngle);
+//
+//            bullet.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.bullet));
+//            lasers.add(bullet);
+//
+//
+//            Log.i("here1", "a: ");
+//
+//            Sprite z = new Sprite();
+//            z.setWidth(0.25f);
+//            z.setHeight(0.25f);
+//            z.setCenterX(-0.25f / ratio);
+//            z.setCenterY(-0.5f);
+//            z.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.bullet));
+////            sprites.add(z);
+//            GameModel.getInstance(this).addBaseSprite(z);
 
-            bullet.setCenterX(ship.getCenterX() + ((float) Math.cos((double) tempAngle) * 0.1f));
-            bullet.setCenterY(ship.getCenterY() + ((float) Math.sin((double) tempAngle) * 0.1f));
-
-            bullet.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.bullet));
-            lasers.add(bullet);
         }
 //            boolean flag = false;
 //            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
