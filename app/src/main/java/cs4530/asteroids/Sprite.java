@@ -238,10 +238,34 @@ public class Sprite {
         Matrix.frustumM(projectionMatrix, 0, -ratio, ratio, -1, 1, 3, 7);
     }
 
+    private void loadTexture() {
+        Log.i("Hs", "here");
+        int[] textureNames = new int[1];
+        textureNames[0] = -1;
+        GLES20.glGenTextures(1, textureNames, 0);
+        Log.i("Hs", "here: " + textureNames[0]);
+        textureName = textureNames[0];
+
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureName);
+        GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, texture, 0);
+        Log.i("Hs", "z: " + texture.toString());
+//
+//
+//        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
+//        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_NEAREST);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
+
+//        texture.recycle();
+    }
+
     public void draw() {
 
         if (!setup) {
             setup();
+            loadTexture();
         }
         // The ordering and setup of the matrices references Google's OpenGL ES tutorial at https://developer.android.com/training/graphics/opengl/index.html
         // and the answer by escalator on Stackoverflow: http://stackoverflow.com/questions/13480043/opengl-es-android-matrix-transformations
@@ -254,12 +278,11 @@ public class Sprite {
 
         Matrix.setRotateM(rotateMatrix, 0, angle, 0, 0, 1.0f);
 
-        float[] matrixTemp = new float[16];
+        float[] matrixTemp;
         matrixTemp = modelMatrix.clone();
         Matrix.multiplyMM(modelMatrix, 0, matrixTemp, 0, rotateMatrix, 0);
         matrixTemp = MVPMatrix.clone();
         Matrix.multiplyMM(MVPMatrix, 0, matrixTemp, 0, modelMatrix, 0);
-
 
         GLES20.glUniform2f(translateUniformLocation, translateX, translateY);
         GLES20.glUniform2f(scaleUniformLocation, scaleX, scaleY);
@@ -269,16 +292,31 @@ public class Sprite {
 
 
         if (textureName <= 0) {
+            Log.i("Hs", "here");
             int[] textureNames = new int[1];
             textureNames[0] = -1;
-            GLES20.glGenTextures(0, textureNames, 0);
+            GLES20.glGenTextures(1, textureNames, 0);
+            Log.i("Hs", "here: " + textureNames[0]);
             textureName = textureNames[0];
 
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureName);
             GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, texture, 0);
-            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
-            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
+            Log.i("Hs", "z: " + texture.toString());
+    //
+    //
+    //        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
+    //        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
+            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
+            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_NEAREST);
+            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
+            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
+
         }
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+
+//        Log.i("te", "s: " + textureName);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureName);
+
 
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, quadGeometry.length / 2);
     }

@@ -19,6 +19,9 @@ import javax.microedition.khronos.opengles.GL10;
 public class MainActivity extends AppCompatActivity implements GLSurfaceView.Renderer, View.OnTouchListener {
 
     List<Sprite> sprites = new ArrayList<>();
+    List<Sprite> lasers = new ArrayList<>();
+    List<Sprite> asteroids = new ArrayList<>();
+    DisplayMetrics metrics = null;
     float ratio = -1;
 
     @Override
@@ -32,7 +35,7 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         surfaceView.setOnTouchListener(this);
         setContentView(surfaceView);
 
-        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        metrics = getResources().getDisplayMetrics();
         ratio = ((float)metrics.heightPixels / (float)metrics.widthPixels);
 
 
@@ -107,10 +110,22 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         GLES20.glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
+        sprites.get(4).setCenterX(sprites.get(4).getCenterX() + 0.01f);
         for (Sprite sprite : sprites) {
             sprite.draw();
         }
 
+        for (int i = 0; i < lasers.size(); i++) {
+            Sprite laser = lasers.get(i);
+            float laserY = (((laser.getCenterY() - 1.0f) * -0.5f) * metrics.heightPixels);
+            float laserX = ((laser.getCenterX() * ratio + 1.0f) * 0.5f) * metrics.widthPixels;
+            if (laserY > metrics.heightPixels || laserY < 0
+                    || laserX > metrics.widthPixels || laserX < 0) {
+                lasers.remove(i);
+            } else {
+                laser.draw();
+            }
+        }
     }
 
     @Override
@@ -123,7 +138,6 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         Sprite thrust = sprites.get(2);
         Sprite shoot = sprites.get(3);
 
-        DisplayMetrics metrics = getResources().getDisplayMetrics();
         float x = motionEvent.getX();
         float y = motionEvent.getY();
 
@@ -152,17 +166,17 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         boolean thrustPress = x >= thrustCenterX - thrustWidth/2 && x <= thrustCenterX + thrustWidth/2 && y >= thrustCenterY - thrustHeight/2 && y <= thrustCenterY + thrustHeight/2;
         boolean shootPress = x >= shootCenterX - shootWidth/2 && x <= shootCenterX + shootWidth/2 && y >= shootCenterY - shootHeight/2 && y <= shootCenterY + shootHeight/2;
         if (rightArrowPress) {
-            Log.i("EVENT", "Starting..");
-            Log.i("EVENT", "Angle: " + ship.getRotation());
-            Log.i("EVENT", "X value: " + ship.getCenterX());
-            Log.i("EVENT", "Y value: " + ship.getCenterY());
+//            Log.i("EVENT", "Starting..");
+//            Log.i("EVENT", "Angle: " + ship.getRotation());
+//            Log.i("EVENT", "X value: " + ship.getCenterX());
+//            Log.i("EVENT", "Y value: " + ship.getCenterY());
             ship.setRotation(ship.getRotation() - 5.0f);
         }
         if (leftArrowPress) {
-            Log.i("EVENT", "Starting..");
-            Log.i("EVENT", "Angle: " + ship.getRotation());
-            Log.i("EVENT", "X value: " + ship.getCenterX());
-            Log.i("EVENT", "Y value: " + ship.getCenterY());
+//            Log.i("EVENT", "Starting..");
+//            Log.i("EVENT", "Angle: " + ship.getRotation());
+//            Log.i("EVENT", "X value: " + ship.getCenterX());
+//            Log.i("EVENT", "Y value: " + ship.getCenterY());
             ship.setRotation(ship.getRotation() + 5.0f);
         }
         if (thrustPress) {
@@ -173,20 +187,34 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
             }
             tempAngle = (float) Math.toRadians(tempAngle);
 
-            Log.i("EVENT", "Starting..");
-            Log.i("EVENT", "Angle: " + ship.getRotation());
-            Log.i("EVENT", "X value: " + ship.getCenterX());
-            Log.i("EVENT", "Y value: " + ship.getCenterY());
-            Log.i("EVENT", "temp value: " + tempAngle);
-            Log.i("EVENT", "Adding to X: " + (float) Math.cos((double) tempAngle));
-            Log.i("EVENT", "Adding to Y: " + (float) Math.sin((double) tempAngle));
-//            ship.setRotation(ship.getRotation() + 45.0f);
+//            Log.i("EVENT", "Starting..");
+//            Log.i("EVENT", "Angle: " + ship.getRotation());
+//            Log.i("EVENT", "X value: " + ship.getCenterX());
+//            Log.i("EVENT", "Y value: " + ship.getCenterY());
+//            Log.i("EVENT", "temp value: " + tempAngle);
+//            Log.i("EVENT", "Adding to X: " + (float) Math.cos((double) tempAngle));
+//            Log.i("EVENT", "Adding to Y: " + (float) Math.sin((double) tempAngle));
             ship.setCenterX(ship.getCenterX() + ((float) Math.cos((double) tempAngle) * 0.1f));
             ship.setCenterY(ship.getCenterY() + ((float) Math.sin((double) tempAngle) * 0.1f));
         }
         if (shootPress) {
-            Log.i("EVENT", "shoot");
-            ship.setRotation(ship.getRotation() + 45.0f);
+//            Log.i("EVENT", "shoot");
+            Sprite bullet = new Sprite();
+            bullet.setHeight(0.25f);
+            bullet.setWidth(0.25f);
+            float tempAngle = ship.getRotation();
+            bullet.setRotation(tempAngle);
+            tempAngle += 90;
+            if (tempAngle >= 360.0f) {
+                tempAngle = tempAngle - 360.0f;
+            }
+            tempAngle = (float) Math.toRadians(tempAngle);
+
+            bullet.setCenterX(ship.getCenterX() + ((float) Math.cos((double) tempAngle) * 0.1f));
+            bullet.setCenterY(ship.getCenterY() + ((float) Math.sin((double) tempAngle) * 0.1f));
+
+            bullet.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.bullet));
+            lasers.add(bullet);
         }
 //            boolean flag = false;
 //            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
