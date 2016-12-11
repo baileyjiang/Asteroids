@@ -14,6 +14,7 @@ import java.util.List;
 public class GameModel {
     private List<Sprite> baseSprites = new ArrayList<Sprite>();
     private List<Sprite> lasers = new ArrayList<Sprite>();
+    private Sprite ship = null;
     private static GameModel instance = null;
     private static Context context = null;
     private float ratio = -1.0f;
@@ -76,7 +77,7 @@ public class GameModel {
         ship.setHeight(0.25f);
 //        ship.setRotation(0.2f);
         ship.setTexture(BitmapFactory.decodeResource(context.getResources(), R.drawable.spaceship));
-        baseSprites.add(ship);
+        this.ship = ship;
 
 //        Sprite z = new Sprite();
 //        z.setWidth(0.25f);
@@ -127,6 +128,10 @@ public class GameModel {
         }
         return null;
 //        return lasers.get(0);
+    }
+
+    public Sprite getShip() {
+        return ship;
     }
 
 }

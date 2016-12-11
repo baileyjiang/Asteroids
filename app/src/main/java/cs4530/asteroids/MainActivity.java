@@ -11,6 +11,7 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -25,6 +26,7 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
     DisplayMetrics metrics = null;
     float ratio = -1;
     GLSurfaceView surfaceView = null;
+    Date gameLoopLastRun = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,6 +116,7 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
 
 
         float ratio = (float) i / i1;
+        GameModel.getInstance(this).getShip().setupProjections(ratio);
         for (Sprite s : sprites) {
             s.setupProjections(ratio);
         }
@@ -128,6 +131,28 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         GLES20.glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 //        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
         GLES20.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
+
+        if (gameLoopLastRun == null) {
+            gameLoopLastRun = new Date();
+        }
+        Date now = new Date();
+        float elapsedTime = (float) (now.getTime() - gameLoopLastRun.getTime()) / 1000.0f;
+        gameLoopLastRun = now;
+        GameModel g = GameModel.getInstance(this);
+
+        Sprite ship = g.getShip();
+//        Log.i("aa", "Elapsed: " + elapsedTime + " velox: " + ship.getVelocityX());
+//
+//        Log.i("A", "current x: " + ship.getCenterX());
+//        Log.i("A", "setting x to: " + ship.getCenterX() + ship.getVelocityX() * elapsedTime);
+        ship.setCenterX(ship.getCenterX() + ship.getVelocityX() * elapsedTime);
+        ship.setCenterY(ship.getCenterY() + ship.getVelocityY() * elapsedTime);
+        if (ship.getCenterY() < 0) {
+//            Log.i("A", "asdas");
+        }
+
+        ship.decelerate();
+        ship.draw();
 
 
 //        sprites.get(4).setCenterX(sprites.get(4).getCenterX() + 0.01f);
@@ -148,7 +173,6 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
 //        while (spriteIterator.hasNext()) {
 //            spriteIterator.next().draw();
 //        }
-        GameModel g = GameModel.getInstance(this);
         for (Sprite s : g.getBaseSprites()) {
             s.draw();
         }
@@ -186,7 +210,7 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         List<Sprite> sprites = GameModel.getInstance(this).getBaseSprites();
 
 
-        Sprite ship = sprites.get(4);
+        Sprite ship = GameModel.getInstance(this).getShip();
 
         Sprite rightArrow = sprites.get(0);
         Sprite leftArrow = sprites.get(1);
@@ -235,22 +259,23 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
             ship.setRotation(ship.getRotation() + 5.0f);
         }
         if (thrustPress) {
-            float tempAngle = ship.getRotation();
-            tempAngle += 90;
-            if (tempAngle >= 360.0f) {
-                tempAngle = tempAngle - 360.0f;
-            }
-            tempAngle = (float) Math.toRadians(tempAngle);
-
-//            Log.i("EVENT", "Starting..");
-//            Log.i("EVENT", "Angle: " + ship.getRotation());
-//            Log.i("EVENT", "X value: " + ship.getCenterX());
-//            Log.i("EVENT", "Y value: " + ship.getCenterY());
-//            Log.i("EVENT", "temp value: " + tempAngle);
-//            Log.i("EVENT", "Adding to X: " + (float) Math.cos((double) tempAngle));
-//            Log.i("EVENT", "Adding to Y: " + (float) Math.sin((double) tempAngle));
-            ship.setCenterX(ship.getCenterX() + ((float) Math.cos((double) tempAngle) * 0.1f));
-            ship.setCenterY(ship.getCenterY() + ((float) Math.sin((double) tempAngle) * 0.1f));
+            ship.accelerate();
+//            float tempAngle = ship.getRotation();
+//            tempAngle += 90;
+//            if (tempAngle >= 360.0f) {
+//                tempAngle = tempAngle - 360.0f;
+//            }
+//            tempAngle = (float) Math.toRadians(tempAngle);
+//
+////            Log.i("EVENT", "Starting..");
+////            Log.i("EVENT", "Angle: " + ship.getRotation());
+////            Log.i("EVENT", "X value: " + ship.getCenterX());
+////            Log.i("EVENT", "Y value: " + ship.getCenterY());
+////            Log.i("EVENT", "temp value: " + tempAngle);
+////            Log.i("EVENT", "Adding to X: " + (float) Math.cos((double) tempAngle));
+////            Log.i("EVENT", "Adding to Y: " + (float) Math.sin((double) tempAngle));
+//            ship.setCenterX(ship.getCenterX() + ((float) Math.cos((double) tempAngle) * 0.1f));
+//            ship.setCenterY(ship.getCenterY() + ((float) Math.sin((double) tempAngle) * 0.1f));
         }
         if (shootPress) {
 //            Log.i("EVENT", "shoot");

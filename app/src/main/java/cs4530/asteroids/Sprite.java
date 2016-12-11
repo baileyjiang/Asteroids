@@ -8,9 +8,11 @@ import android.opengl.GLUtils;
 import android.opengl.Matrix;
 import android.util.Log;
 
+import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.text.DecimalFormat;
 
 /**
  * Created by blyjng on 12/3/16.
@@ -48,6 +50,8 @@ public class Sprite {
     private float scaleX = 1.0f;
     private float scaleY = 1.0f;
     private float angle = 0.0f;
+    private float velocityX = 0.0f;
+    private float velocityY = 0.0f;
     private float[] rotateMatrix = new float[16];
     private float[] projectionMatrix = new float[16];
     private float[] modelMatrix = new float[16];
@@ -105,6 +109,22 @@ public class Sprite {
         scaleY = height;
     }
 
+    public float getVelocityX() {
+        return velocityX;
+    }
+
+    public void setVelocityX(float velocityX) {
+        this.velocityX = velocityX;
+    }
+
+    public float getVelocityY() {
+        return velocityY;
+    }
+
+    public void setVelocityY(float velocityY) {
+        this.velocityY = velocityY;
+    }
+
     public Bitmap getTexture() {
         return texture;
     }
@@ -127,6 +147,40 @@ public class Sprite {
         }
     }
 
+    public void accelerate() {
+        float tempAngle = angle;
+        tempAngle += 90.0f;
+            if (tempAngle >= 360.0f) {
+                tempAngle = tempAngle - 360.0f;
+            }
+        tempAngle = (float) Math.toRadians(tempAngle);
+
+        // Round numbers
+        double roundedCos = Math.round(Math.cos(tempAngle) * 100000);
+        double roundedSin = Math.round(Math.sin(tempAngle) * 100000);
+        double xResult = roundedCos/100000;
+        double yResult = roundedSin/100000;
+
+        float tempVelocityX = velocityX + (float) xResult * 0.1f;
+        float tempVelocityY = velocityY + (float) yResult * 0.1f;
+        if (Math.sqrt(tempVelocityX * tempVelocityX + tempVelocityY * tempVelocityY) < 0.5f)
+        {
+            velocityX = tempVelocityX;
+            velocityY = tempVelocityY;
+        }
+    }
+
+    public void decelerate() {
+        if (velocityX != 0 || velocityY != 0) {
+            float tempVelocityX = velocityX / 150;
+            tempVelocityX = velocityX - tempVelocityX;
+            float tempVelocityY = velocityY / 150;
+            tempVelocityY = velocityY - tempVelocityY;
+
+            velocityX = tempVelocityX;
+            velocityY = tempVelocityY;
+        }
+    }
 
     private static void setup() {
         String vertexShaderSource = "" +
