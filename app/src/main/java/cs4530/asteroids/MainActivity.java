@@ -141,38 +141,13 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         GameModel g = GameModel.getInstance(this);
 
         Sprite ship = g.getShip();
-//        Log.i("aa", "Elapsed: " + elapsedTime + " velox: " + ship.getVelocityX());
-//
-//        Log.i("A", "current x: " + ship.getCenterX());
-//        Log.i("A", "setting x to: " + ship.getCenterX() + ship.getVelocityX() * elapsedTime);
         ship.setCenterX(ship.getCenterX() + ship.getVelocityX() * elapsedTime);
         ship.setCenterY(ship.getCenterY() + ship.getVelocityY() * elapsedTime);
-        if (ship.getCenterY() < 0) {
-//            Log.i("A", "asdas");
-        }
 
         ship.decelerate();
+        checkEdges();
         ship.draw();
 
-
-//        sprites.get(4).setCenterX(sprites.get(4).getCenterX() + 0.01f);
-
-//        Sprite z = new Sprite();
-//        z.setWidth(0.25f);
-//        z.setHeight(0.25f);
-//        z.setCenterX(-0.25f / ratio);
-//        z.setCenterY(-0.5f);
-//        z.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.bullet));
-//        z.tag = "123";
-//        GameModel.getInstance(this).addBaseSprite(z);
-//        List<Sprite> sprites = GameModel.getInstance(this).getBaseSprites();
-//        if (sprites.size() > 8) {
-//            Log.i("a", "size: " + sprites.size());
-//        }
-//        Iterator<Sprite> spriteIterator = sprites.iterator();
-//        while (spriteIterator.hasNext()) {
-//            spriteIterator.next().draw();
-//        }
         for (Sprite s : g.getBaseSprites()) {
             s.draw();
         }
@@ -190,18 +165,29 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
 
             laser.draw();
         }
+    }
 
-//        for (int i = 0; i < lasers.size(); i++) {
-//            Sprite laser = lasers.get(i);
-//            float laserY = (((laser.getCenterY() - 1.0f) * -0.5f) * metrics.heightPixels);
-//            float laserX = ((laser.getCenterX() * ratio + 1.0f) * 0.5f) * metrics.widthPixels;
-////            if (laserY > metrics.heightPixels || laserY < 0
-////                    || laserX > metrics.widthPixels || laserX < 0) {
-////                lasers.remove(i);
-////            } else {
-//                laser.draw();
-////            }
-//        }
+    // Wraps certain sprites around if they hit an edge.
+    private void checkEdges() {
+        GameModel g = GameModel.getInstance(this);
+        Sprite ship = g.getShip();
+        float shipX = ((ship.getCenterX() * ratio + 1.0f) * 0.5f) * metrics.widthPixels;
+        float shipY = ((ship.getCenterY() - 1.0f) * -0.5f) * metrics.heightPixels;
+
+        if (shipX < 0) {
+            ship.setCenterX(1.0f / ratio);
+            Log.i("HIT", "x 0 : " + shipX);
+        }
+        if (shipX > metrics.widthPixels) {
+            ship.setCenterX(-1.0f / ratio);
+            Log.i("HIT", "x max : " + shipX);
+        }
+        if (shipY < 0) {
+            ship.setCenterY(-1.0f);
+        }
+        if (shipY > metrics.heightPixels) {
+            ship.setCenterY(1.0f);
+        }
     }
 
     @Override
