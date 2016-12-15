@@ -43,64 +43,6 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         metrics = getResources().getDisplayMetrics();
         ratio = ((float)metrics.heightPixels / (float)metrics.widthPixels);
 
-
-//        Sprite sprite = new Sprite();
-//        sprite.setWidth(1.0f);
-//        sprite.setHeight(2.0f);
-////        sprite.setCenterX(0.4f);
-////        sprite.setCenterY(0.0f);
-//        sprite.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.texture));
-//        sprites.add(sprite);
-
-
-//        Sprite rightArrow = new Sprite();
-//        rightArrow.setWidth(0.25f);
-//        rightArrow.setHeight(0.25f);
-//        rightArrow.setCenterX(-0.25f / ratio);
-//        rightArrow.setCenterY(-0.85f);
-//        rightArrow.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.transparent_arrow_right));
-//        sprites.add(rightArrow);
-//
-//        Sprite leftArrow = new Sprite();
-//        leftArrow.setWidth(0.25f);
-//        leftArrow.setHeight(0.25f);
-//        leftArrow.setCenterX(-0.75f / ratio);
-//        leftArrow.setCenterY(-0.85f);
-//        leftArrow.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.transparent_arrow_left));
-//        sprites.add(leftArrow);
-//
-//        Sprite upArrow = new Sprite();
-//        upArrow.setWidth(0.25f);
-//        upArrow.setHeight(0.25f);
-//        upArrow.setCenterX(0.25f / ratio);
-//        upArrow.setCenterY(-0.85f);
-//        upArrow.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.transparent_arrow_up));
-//        sprites.add(upArrow);
-//
-//        Sprite shoot = new Sprite();
-//        shoot.setWidth(0.25f);
-//        shoot.setHeight(0.25f);
-//        shoot.setCenterX(0.75f / ratio);
-//        shoot.setCenterY(-0.85f);
-//        shoot.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.bullet));
-//        sprites.add(shoot);
-//
-//
-//        Sprite ship = new Sprite();
-//        ship.setWidth(0.25f);
-//        ship.setHeight(0.25f);
-////        ship.setRotation(0.2f);
-//        ship.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.spaceship));
-//        sprites.add(ship);
-
-//        Sprite z = new Sprite();
-//        z.setWidth(0.25f);
-//        z.setHeight(0.25f);
-//        z.setCenterX(-0.25f / ratio);
-//        z.setCenterY(-0.5f);
-//        z.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.bullet));
-//        lasers.add(z);
-//        sprites.add(z);
     }
 
     @Override
@@ -246,22 +188,12 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         }
         if (thrustPress) {
             ship.accelerate();
-//            float tempAngle = ship.getRotation();
-//            tempAngle += 90;
-//            if (tempAngle >= 360.0f) {
-//                tempAngle = tempAngle - 360.0f;
-//            }
-//            tempAngle = (float) Math.toRadians(tempAngle);
-//
-////            Log.i("EVENT", "Starting..");
-////            Log.i("EVENT", "Angle: " + ship.getRotation());
-////            Log.i("EVENT", "X value: " + ship.getCenterX());
-////            Log.i("EVENT", "Y value: " + ship.getCenterY());
-////            Log.i("EVENT", "temp value: " + tempAngle);
-////            Log.i("EVENT", "Adding to X: " + (float) Math.cos((double) tempAngle));
-////            Log.i("EVENT", "Adding to Y: " + (float) Math.sin((double) tempAngle));
-//            ship.setCenterX(ship.getCenterX() + ((float) Math.cos((double) tempAngle) * 0.1f));
-//            ship.setCenterY(ship.getCenterY() + ((float) Math.sin((double) tempAngle) * 0.1f));
+            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                ship.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.spaceship_thrust));
+            }
+            if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                ship.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.spaceship));
+            }
         }
         if (shootPress) {
 //            Log.i("EVENT", "shoot");
@@ -283,33 +215,7 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
                 bullet.setCenterX(ship.getCenterX() + ((float) Math.cos((double) tempAngle) * 0.1f));
                 bullet.setCenterY(ship.getCenterY() + ((float) Math.sin((double) tempAngle) * 0.1f));
             }
-//
-//            bullet.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.bullet));
-//            lasers.add(bullet);
-//
-//
-//            Log.i("here1", "a: ");
-//
-//            Sprite z = new Sprite();
-//            z.setWidth(0.25f);
-//            z.setHeight(0.25f);
-//            z.setCenterX(-0.25f / ratio);
-//            z.setCenterY(-0.5f);
-//            z.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.bullet));
-////            sprites.add(z);
-//            GameModel.getInstance(this).addBaseSprite(z);
-
         }
-//            boolean flag = false;
-//            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-//                flag = true;
-//            }
-//            if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
-//                flag = false;
-//            }
-//            while (flag) {
-//            }
-
         return true;
     }
 }

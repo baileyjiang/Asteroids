@@ -1,8 +1,14 @@
 package cs4530.asteroids;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.ColorFilter;
+import android.graphics.Paint;
+import android.graphics.drawable.Drawable;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
 import android.opengl.Matrix;
@@ -59,9 +65,14 @@ public class Sprite {
     private float[] MVPMatrix = new float[16];
     private Bitmap texture = null;
     private int textureName = -1;
-
-    //TODO: Dlete this
-    String tag;
+//    private Context context;
+//
+//    //TODO: Dlete this
+//    String tag;
+//
+//    public Sprite(Context context) {
+//        this.context = context;
+//    }
 
     private static int program = -1;
 
@@ -131,6 +142,26 @@ public class Sprite {
 
     public void setTexture(Bitmap texture) {
         this.texture = texture;
+        if (textureName != -1) {
+//            int[] doomedTextures = {textureName};
+//            GLES20.glDeleteTextures(GLES20.GL_TEXTURE_2D, doomedTextures, 0);
+            textureName = -1;
+        }
+    }
+
+    // Text texture is captured through a Canvas object. The implementation is based off of JVitela's answer on StackOverflow:
+    // http://stackoverflow.com/questions/1339136/draw-text-in-opengl-es
+    public void setTextTexture(String text) {
+        texture = Bitmap.createBitmap(256, 256, Bitmap.Config.ARGB_4444);
+        Canvas canvas = new Canvas(texture);
+        texture.eraseColor(0);
+
+        Paint textPaint = new Paint();
+        textPaint.setTextSize(32);
+        textPaint.setAntiAlias(true);
+        textPaint.setColor(Color.WHITE);
+
+        canvas.drawText(text, 16,112, textPaint);
     }
 
     public float getRotation() {
@@ -195,27 +226,7 @@ public class Sprite {
                 "\n" +
                 "\n" +
                 "void main() {\n" +
-//                "   gl_Position = matrix * vec4(position.x * scale.x + translate.x, position.y * scale.y + translate.y, 0.0, 1.0);\n" +
                 "   gl_Position = matrix * vec4(position.x * scale.x, position.y * scale.y, 0.0, 1.0);\n" +
-
-//                "   gl_Position = matrix * vec4(position.x * scale.x, position.y * scale.y, 0.0, 1.0);\n" +
-//                "   gl_Position = matrix * vec4(position.x, position.y, 0.0, 1.0);\n" +
-
-//                "   gl_Position = matrix * vec4(position.x, position.y, 0.0, 1.0); \n" +
-
-//                "   gl_Position = vec4(position.x, position.y, 0.0, 1.0) * matrix;\n" +
-
-
-//                "   gl_Position = vec4(((position.x * scale.x + translate.x) * cos(angle)) - ((position.y * scale.y + translate.y) * sin(angle))," +
-//                " ((position.x * scale.x + translate.x) * sin(angle)) + ((position.y * scale.y + translate.y) * cos(angle)), 0.0, 1.0);\n" +
-//
-//                "   gl_Position = vec4(((position.x * scale.x + translate.x) * cos(angle)) - ((position.y * scale.y + translate.y) * sin(angle))," +
-//                " ((position.x * scale.x + translate.x) * sin(angle)) + ((position.y * scale.y + translate.y) * cos(angle)), 0.0, 1.0);\n" +
-
-//
-//
-//                "   gl_Position = vec4(((position.x * cos(angle) * scale.x + translate.x)) - ((position.y * sin(angle) * scale.y + translate.y))," +
-//                " ((position.x * sin(angle) * scale.x + translate.x)) + ((position.y * cos(angle) * scale.y + translate.y)), 0.0, 1.0);\n" +
                 "   textureCoordinateInterpolated = textureCoordinate; \n" +
                 "}\n" +
                 "\n" +
@@ -298,13 +309,7 @@ public class Sprite {
 
     public void draw() {
 
-        if (tag == "123") {
-            Log.i("ASD", "here!");
-        }
         if (!setup) {
-            if (tag == "123") {
-                Log.i("ASD", "setup!");
-            }
             setup();
         }
 
@@ -343,10 +348,6 @@ public class Sprite {
 
             GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
             GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
-//            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
-//            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_NEAREST);
-//            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
-//            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
         }
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureName);

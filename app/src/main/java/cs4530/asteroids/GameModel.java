@@ -6,6 +6,7 @@ import android.util.DisplayMetrics;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Created by blyjng on 12/10/16.
@@ -14,6 +15,8 @@ import java.util.List;
 public class GameModel {
     private List<Sprite> baseSprites = new ArrayList<Sprite>();
     private List<Sprite> lasers = new ArrayList<Sprite>();
+    private List<Sprite> asteroidsBig = new ArrayList<Sprite>();
+    private List<Sprite> asteroidsSmall = new ArrayList<Sprite>();
     private Sprite ship = null;
     private static GameModel instance = null;
     private static Context context = null;
@@ -71,22 +74,63 @@ public class GameModel {
         shoot.setTexture(BitmapFactory.decodeResource(context.getResources(), R.drawable.bullet));
         baseSprites.add(shoot);
 
+        Sprite score = new Sprite();
+        score.setWidth(0.5f);
+        score.setHeight(0.5f);
+        score.setCenterX(-0.65f / ratio);
+        score.setCenterY(0.9f);
+        score.setTextTexture("Score");
+        baseSprites.add(score);
+
+        Sprite scoreValue = new Sprite();
+        scoreValue.setWidth(0.5f);
+        scoreValue.setHeight(0.5f);
+        scoreValue.setCenterX(-0.65f / ratio);
+        scoreValue.setCenterY(0.8f);
+        scoreValue.setTextTexture("" + 123890);
+        baseSprites.add(scoreValue);
+
+        Sprite level = new Sprite();
+        level.setWidth(0.5f);
+        level.setHeight(0.5f);
+        level.setCenterX(0.25f / ratio);
+        level.setCenterY(0.9f);
+        level.setTextTexture("Level");
+        baseSprites.add(level);
+
+        Sprite levelValue = new Sprite();
+        levelValue.setWidth(0.5f);
+        levelValue.setHeight(0.5f);
+        levelValue.setCenterX(0.25f / ratio);
+        levelValue.setCenterY(0.8f);
+        levelValue.setTextTexture("" + 123890);
+        baseSprites.add(levelValue);
+
+        Sprite lives = new Sprite();
+        lives.setWidth(0.5f);
+        lives.setHeight(0.5f);
+        lives.setCenterX(1.15f / ratio);
+        lives.setCenterY(0.9f);
+        lives.setTextTexture("Lives");
+        baseSprites.add(lives);
+
+        Sprite livesValue = new Sprite();
+        livesValue.setWidth(0.5f);
+        livesValue.setHeight(0.5f);
+        livesValue.setCenterX(1.15f / ratio);
+        livesValue.setCenterY(0.8f);
+        livesValue.setTextTexture("" + 0);
+        baseSprites.add(livesValue);
+
+
+
 
         Sprite ship = new Sprite();
         ship.setWidth(0.25f);
         ship.setHeight(0.25f);
-//        ship.setRotation(0.2f);
         ship.setTexture(BitmapFactory.decodeResource(context.getResources(), R.drawable.spaceship));
         this.ship = ship;
 
-//        Sprite z = new Sprite();
-//        z.setWidth(0.25f);
-//        z.setHeight(0.25f);
-//        z.setCenterX(-0.25f / ratio);
-//        z.setCenterY(-0.5f);
-//        z.setTexture(BitmapFactory.decodeResource(context.getResources(), R.drawable.bullet));
-//        lasers.add(z);
-//        baseSprites.add(z);
 
         for (int i = 0; i < 10; i++) {
             Sprite l = new Sprite();
@@ -98,6 +142,69 @@ public class GameModel {
 //            baseSprites.add(l);
             lasers.add(l);
         }
+
+        int asteroid1 = R.drawable.asteroid1;
+        int asteroid2 = R.drawable.asteroid2;
+        int asteroid3 = R.drawable.asteroid3;
+        int asteroid4 = R.drawable.asteroid4;
+        int asteroid5 = R.drawable.asteroid5;
+
+        Random rand = new Random();
+        for (int i = 0; i < 100; i++) {
+            int asteroidNumber = rand.nextInt(5);
+            asteroidNumber++;
+            int asteroidTextureNumber = 0;
+            if (asteroidNumber == 1) {
+                asteroidTextureNumber = asteroid1;
+            }
+            if (asteroidNumber == 2) {
+                asteroidTextureNumber = asteroid2;
+            }
+            if (asteroidNumber == 3) {
+                asteroidTextureNumber = asteroid3;
+            }
+            if (asteroidNumber == 4) {
+                asteroidTextureNumber = asteroid4;
+            }
+            if (asteroidNumber == 5) {
+                asteroidTextureNumber = asteroid5;
+            }
+            Sprite a = new Sprite();
+            a.setWidth(0.15f);
+            a.setHeight(0.15f);
+            a.setCenterX(90.0f);
+            a.setCenterY(90.0f);
+            a.setTexture(BitmapFactory.decodeResource(context.getResources(), asteroidTextureNumber));
+            asteroidsBig.add(a);
+        }
+        for (int i = 0; i < 100; i++) {
+            int asteroidNumber = rand.nextInt(5);
+            asteroidNumber++;
+            int asteroidTextureNumber = 0;
+            if (asteroidNumber == 1) {
+                asteroidTextureNumber = asteroid1;
+            }
+            if (asteroidNumber == 2) {
+                asteroidTextureNumber = asteroid2;
+            }
+            if (asteroidNumber == 3) {
+                asteroidTextureNumber = asteroid3;
+            }
+            if (asteroidNumber == 4) {
+                asteroidTextureNumber = asteroid4;
+            }
+            if (asteroidNumber == 5) {
+                asteroidTextureNumber = asteroid5;
+            }
+            Sprite a = new Sprite();
+            a.setWidth(0.05f);
+            a.setHeight(0.05f);
+            a.setCenterX(90.0f);
+            a.setCenterY(90.0f);
+            a.setTexture(BitmapFactory.decodeResource(context.getResources(), asteroidTextureNumber));
+            asteroidsSmall.add(a);
+        }
+
     }
 
     public List<Sprite> getBaseSprites() {
@@ -106,6 +213,14 @@ public class GameModel {
 
     public List<Sprite> getLaserSprites() {
         return lasers;
+    }
+
+    public List<Sprite> getAsteroidsBigSprites() {
+        return asteroidsBig;
+    }
+
+    public List<Sprite> getAsteroidsSmallSprites() {
+        return asteroidsSmall;
     }
 
     public void addLaser(Sprite s) {
