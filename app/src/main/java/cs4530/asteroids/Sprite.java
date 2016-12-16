@@ -65,6 +65,7 @@ public class Sprite {
     private float[] MVPMatrix = new float[16];
     private Bitmap texture = null;
     private int textureName = -1;
+    private boolean setupVelocity = false;
 //    private Context context;
 //
 //    //TODO: Dlete this
@@ -176,6 +177,14 @@ public class Sprite {
         if (angle < 0.0f) {
             angle = angle + 360.0f;
         }
+    }
+
+    public boolean isSetupVelocity() {
+        return setupVelocity;
+    }
+
+    public void setSetupVelocity(boolean setupVelocity) {
+        this.setupVelocity = setupVelocity;
     }
 
     public void accelerate() {

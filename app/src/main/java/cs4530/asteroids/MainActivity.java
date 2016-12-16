@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -55,6 +56,8 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         GLES20.glViewport(0, 0, i, i1);
         List<Sprite> sprites = GameModel.getInstance(this).getBaseSprites();
         List<Sprite> lasers = GameModel.getInstance(this).getLaserSprites();
+        List<Sprite> asteroidsBig = GameModel.getInstance(this).getAsteroidsBigSprites();
+        List<Sprite> asteroidsSmall = GameModel.getInstance(this).getAsteroidsSmallSprites();
 
 
         float ratio = (float) i / i1;
@@ -63,6 +66,12 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
             s.setupProjections(ratio);
         }
         for (Sprite s : lasers) {
+            s.setupProjections(ratio);
+        }
+        for (Sprite s : asteroidsBig) {
+            s.setupProjections(ratio);
+        }
+        for (Sprite s : asteroidsSmall) {
             s.setupProjections(ratio);
         }
     }
@@ -81,6 +90,7 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         float elapsedTime = (float) (now.getTime() - gameLoopLastRun.getTime()) / 1000.0f;
         gameLoopLastRun = now;
         GameModel g = GameModel.getInstance(this);
+        Random rand = new Random();
 
         Sprite ship = g.getShip();
         ship.setCenterX(ship.getCenterX() + ship.getVelocityX() * elapsedTime);
@@ -106,6 +116,59 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
             laser.setCenterY(laser.getCenterY() + ((float) Math.sin((double) tempAngle) * 0.1f));
 
             laser.draw();
+
+            // check if it hits an asteroid
+            for (Sprite asteroids : g.getAsteroidsModelBig()) {
+                float vectorX = laser.getCenterX() - asteroids.getCenterX();
+                float vectorY = laser.getCenterY() - asteroids.getCenterY();
+                float vectorLength = (float) Math.sqrt(vectorX * vectorX + vectorY * vectorY);
+                if (vectorLength < laser.getWidth() * 0.5f + asteroids.getWidth() * 0.5f) {
+                    laser.setCenterX(90.0f);
+                    laser.setCenterY(90.0f);
+                    g.getAsteroidsModelBig().remove(asteroids);
+                    asteroids.setSetupVelocity(false);
+                    g.updateModelSmall();
+                    // Set up small asteroids here.
+                    for (Sprite asteroidsSmall : g.getAsteroidsModelSmall()) {
+                        if (!asteroidsSmall.isSetupVelocity()) {
+                            asteroidsSmall.setVelocityX(rand.nextFloat()/2);
+                            asteroidsSmall.setVelocityY(rand.nextFloat()/2);
+                            asteroidsSmall.setCenterX(asteroids.getCenterX());
+                            asteroidsSmall.setCenterY(asteroids.getCenterY());
+                            asteroidsSmall.setSetupVelocity(true);
+                        }
+                    }
+                }
+            }
+        }
+
+        for (Sprite asteroidsBig : g.getAsteroidsModelBig()) {
+            // TODO: random rotations
+//            int rotation = -1;
+//            if (rand.nextBoolean()) {
+//                rotation = 1;
+//            }
+            if (!asteroidsBig.isSetupVelocity()) {
+                asteroidsBig.setVelocityX(rand.nextFloat()/2);
+                asteroidsBig.setVelocityY(rand.nextFloat()/2);
+                asteroidsBig.setSetupVelocity(true);
+            }
+//            asteroidsBig.setRotation(asteroidsBig.getRotation() + (rotation * 20f));
+            asteroidsBig.setCenterX(asteroidsBig.getCenterX() + asteroidsBig.getVelocityX() * elapsedTime);
+            asteroidsBig.setCenterY(asteroidsBig.getCenterY() + asteroidsBig.getVelocityY() * elapsedTime);
+            asteroidsBig.draw();
+        }
+
+        for (Sprite asteroidsSmall : g.getAsteroidsModelSmall()) {
+            // TODO: random rotations
+//            int rotation = -1;
+//            if (rand.nextBoolean()) {
+//                rotation = 1;
+//            }
+//            asteroidsBig.setRotation(asteroidsBig.getRotation() + (rotation * 20f));
+            asteroidsSmall.setCenterX(asteroidsSmall.getCenterX() + asteroidsSmall.getVelocityX() * elapsedTime);
+            asteroidsSmall.setCenterY(asteroidsSmall.getCenterY() + asteroidsSmall.getVelocityY() * elapsedTime);
+            asteroidsSmall.draw();
         }
     }
 
@@ -129,6 +192,46 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
         }
         if (shipY > metrics.heightPixels) {
             ship.setCenterY(1.0f);
+        }
+
+        for (Sprite asteroidsBig : g.getAsteroidsModelBig()) {
+            float asteroidX = ((asteroidsBig.getCenterX() * ratio + 1.0f) * 0.5f) * metrics.widthPixels;
+            float asteroidY = ((asteroidsBig.getCenterY() - 1.0f) * -0.5f) * metrics.heightPixels;
+
+            if (asteroidX < 0) {
+                asteroidsBig.setCenterX(1.0f / ratio);
+                Log.i("HIT", "x 0 : " + shipX);
+            }
+            if (asteroidX > metrics.widthPixels) {
+                asteroidsBig.setCenterX(-1.0f / ratio);
+                Log.i("HIT", "x max : " + shipX);
+            }
+            if (asteroidY < 0) {
+                asteroidsBig.setCenterY(-1.0f);
+            }
+            if (asteroidY > metrics.heightPixels) {
+                asteroidsBig.setCenterY(1.0f);
+            }
+        }
+
+        for (Sprite asteroidsSmall : g.getAsteroidsModelSmall()) {
+            float asteroidX = ((asteroidsSmall.getCenterX() * ratio + 1.0f) * 0.5f) * metrics.widthPixels;
+            float asteroidY = ((asteroidsSmall.getCenterY() - 1.0f) * -0.5f) * metrics.heightPixels;
+
+            if (asteroidX < 0) {
+                asteroidsSmall.setCenterX(1.0f / ratio);
+                Log.i("HIT", "x 0 : " + shipX);
+            }
+            if (asteroidX > metrics.widthPixels) {
+                asteroidsSmall.setCenterX(-1.0f / ratio);
+                Log.i("HIT", "x max : " + shipX);
+            }
+            if (asteroidY < 0) {
+                asteroidsSmall.setCenterY(-1.0f);
+            }
+            if (asteroidY > metrics.heightPixels) {
+                asteroidsSmall.setCenterY(1.0f);
+            }
         }
     }
 
