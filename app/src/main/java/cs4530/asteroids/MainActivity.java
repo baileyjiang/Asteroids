@@ -128,6 +128,7 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
                     g.getAsteroidsModelBig().remove(asteroids);
                     asteroids.setSetupVelocity(false);
                     g.updateModelSmall();
+                    g.setScore(g.getScore() + 100);
                     // Set up small asteroids here.
                     for (Sprite asteroidsSmall : g.getAsteroidsModelSmall()) {
                         if (!asteroidsSmall.isSetupVelocity()) {
@@ -140,6 +141,22 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
                     }
                 }
             }
+
+            List<Sprite> toRemove = new ArrayList<>();
+            for (Sprite asteroids : g.getAsteroidsModelSmall()) {
+                float vectorX = laser.getCenterX() - asteroids.getCenterX();
+                float vectorY = laser.getCenterY() - asteroids.getCenterY();
+                float vectorLength = (float) Math.sqrt(vectorX * vectorX + vectorY * vectorY);
+                if (vectorLength < laser.getWidth() * 0.5f + asteroids.getWidth() * 0.5f) {
+                    laser.setCenterX(90.0f);
+                    laser.setCenterY(90.0f);
+//                    g.getAsteroidsModelSmall().remove(asteroids);
+                    toRemove.add(asteroids);
+                    asteroids.setSetupVelocity(false);
+                    g.setScore(g.getScore() + 50);
+                }
+            }
+            g.getAsteroidsModelSmall().removeAll(toRemove);
         }
 
         for (Sprite asteroidsBig : g.getAsteroidsModelBig()) {
@@ -181,11 +198,9 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
 
         if (shipX < 0) {
             ship.setCenterX(1.0f / ratio);
-            Log.i("HIT", "x 0 : " + shipX);
         }
         if (shipX > metrics.widthPixels) {
             ship.setCenterX(-1.0f / ratio);
-            Log.i("HIT", "x max : " + shipX);
         }
         if (shipY < 0) {
             ship.setCenterY(-1.0f);
@@ -200,11 +215,9 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
 
             if (asteroidX < 0) {
                 asteroidsBig.setCenterX(1.0f / ratio);
-                Log.i("HIT", "x 0 : " + shipX);
             }
             if (asteroidX > metrics.widthPixels) {
                 asteroidsBig.setCenterX(-1.0f / ratio);
-                Log.i("HIT", "x max : " + shipX);
             }
             if (asteroidY < 0) {
                 asteroidsBig.setCenterY(-1.0f);
@@ -220,11 +233,9 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
 
             if (asteroidX < 0) {
                 asteroidsSmall.setCenterX(1.0f / ratio);
-                Log.i("HIT", "x 0 : " + shipX);
             }
             if (asteroidX > metrics.widthPixels) {
                 asteroidsSmall.setCenterX(-1.0f / ratio);
-                Log.i("HIT", "x max : " + shipX);
             }
             if (asteroidY < 0) {
                 asteroidsSmall.setCenterY(-1.0f);

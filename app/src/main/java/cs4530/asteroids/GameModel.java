@@ -26,6 +26,9 @@ public class GameModel {
     private int score = 0;
     private int lives = 3;
     private int level = 1;
+    private Sprite levelTextValue;
+    private Sprite scoreTextValue;
+    private Sprite livesTextValue;
     private Random rand;
 
     public static GameModel getInstance(Context c) {
@@ -88,12 +91,12 @@ public class GameModel {
         scoreText.setTextTexture("Score");
         baseSprites.add(scoreText);
 
-        Sprite scoreTextValue = new Sprite();
+        scoreTextValue = new Sprite();
         scoreTextValue.setWidth(0.5f);
         scoreTextValue.setHeight(0.5f);
         scoreTextValue.setCenterX(-0.65f / ratio);
         scoreTextValue.setCenterY(0.8f);
-        scoreTextValue.setTextTexture("" + 123890);
+        scoreTextValue.setTextTexture("" + score);
         baseSprites.add(scoreTextValue);
 
         Sprite levelText = new Sprite();
@@ -104,12 +107,12 @@ public class GameModel {
         levelText.setTextTexture("Level");
         baseSprites.add(levelText);
 
-        Sprite levelTextValue = new Sprite();
+        levelTextValue = new Sprite();
         levelTextValue.setWidth(0.5f);
         levelTextValue.setHeight(0.5f);
         levelTextValue.setCenterX(0.25f / ratio);
         levelTextValue.setCenterY(0.8f);
-        levelTextValue.setTextTexture("" + 123890);
+        levelTextValue.setTextTexture("" + level);
         baseSprites.add(levelTextValue);
 
         Sprite livesText = new Sprite();
@@ -120,12 +123,12 @@ public class GameModel {
         livesText.setTextTexture("Lives");
         baseSprites.add(livesText);
 
-        Sprite livesTextValue = new Sprite();
+        livesTextValue = new Sprite();
         livesTextValue.setWidth(0.5f);
         livesTextValue.setHeight(0.5f);
         livesTextValue.setCenterX(1.15f / ratio);
         livesTextValue.setCenterY(0.8f);
-        livesTextValue.setTextTexture("" + 0);
+        livesTextValue.setTextTexture("" + lives);
         baseSprites.add(livesTextValue);
 
 
@@ -263,6 +266,7 @@ public class GameModel {
 
     public void setScore(int score) {
         this.score = score;
+        scoreTextValue.setTextTexture("" + this.score);
     }
 
     public int getLives() {
@@ -271,6 +275,7 @@ public class GameModel {
 
     public void setLives(int lives) {
         this.lives = lives;
+        livesTextValue.setTextTexture("" + this.lives);
     }
 
     public int getLevel() {
@@ -279,6 +284,7 @@ public class GameModel {
 
     public void setLevel(int level) {
         this.level = level;
+        levelTextValue.setTextTexture("" + this.level);
     }
 
     public List<Sprite> getAsteroidsModelSmall() {

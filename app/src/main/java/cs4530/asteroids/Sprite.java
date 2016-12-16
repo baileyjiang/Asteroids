@@ -163,6 +163,9 @@ public class Sprite {
         textPaint.setColor(Color.WHITE);
 
         canvas.drawText(text, 16,112, textPaint);
+        if (textureName != -1) {
+            textureName = -1;
+        }
     }
 
     public float getRotation() {
