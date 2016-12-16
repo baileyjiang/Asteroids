@@ -66,6 +66,7 @@ public class Sprite {
     private Bitmap texture = null;
     private int textureName = -1;
     private boolean setupVelocity = false;
+    private boolean isDestroyed = false;
 //    private Context context;
 //
 //    //TODO: Dlete this
@@ -135,6 +136,14 @@ public class Sprite {
 
     public void setVelocityY(float velocityY) {
         this.velocityY = velocityY;
+    }
+
+    public boolean isDestroyed() {
+        return isDestroyed;
+    }
+
+    public void setDestroyed(boolean destroyed) {
+        isDestroyed = destroyed;
     }
 
     public Bitmap getTexture() {

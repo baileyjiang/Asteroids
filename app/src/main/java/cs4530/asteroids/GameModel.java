@@ -214,7 +214,7 @@ public class GameModel {
             asteroidsSmall.add(a);
         }
 
-        asteroidsModelBig = asteroidsBig.subList(0, 1);
+        asteroidsModelBig = asteroidsBig.subList(0, level);
 
     }
 
@@ -298,5 +298,9 @@ public class GameModel {
     public void updateModelSmall() {
         int randIndex = rand.nextInt(asteroidsSmall.size() - 4);
         asteroidsModelSmall.addAll(asteroidsSmall.subList(randIndex, randIndex + 4));
+    }
+
+    public void updateModelBig() {
+        asteroidsModelBig = asteroidsBig.subList(0, level);
     }
 }

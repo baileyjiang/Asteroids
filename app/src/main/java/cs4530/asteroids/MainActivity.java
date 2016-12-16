@@ -119,24 +119,26 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
 
             // check if it hits an asteroid
             for (Sprite asteroids : g.getAsteroidsModelBig()) {
-                float vectorX = laser.getCenterX() - asteroids.getCenterX();
-                float vectorY = laser.getCenterY() - asteroids.getCenterY();
-                float vectorLength = (float) Math.sqrt(vectorX * vectorX + vectorY * vectorY);
-                if (vectorLength < laser.getWidth() * 0.5f + asteroids.getWidth() * 0.5f) {
-                    laser.setCenterX(90.0f);
-                    laser.setCenterY(90.0f);
-                    g.getAsteroidsModelBig().remove(asteroids);
-                    asteroids.setSetupVelocity(false);
-                    g.updateModelSmall();
-                    g.setScore(g.getScore() + 100);
-                    // Set up small asteroids here.
-                    for (Sprite asteroidsSmall : g.getAsteroidsModelSmall()) {
-                        if (!asteroidsSmall.isSetupVelocity()) {
-                            asteroidsSmall.setVelocityX(rand.nextFloat()/2);
-                            asteroidsSmall.setVelocityY(rand.nextFloat()/2);
-                            asteroidsSmall.setCenterX(asteroids.getCenterX());
-                            asteroidsSmall.setCenterY(asteroids.getCenterY());
-                            asteroidsSmall.setSetupVelocity(true);
+                if (!asteroids.isDestroyed()) {
+                    float vectorX = laser.getCenterX() - asteroids.getCenterX();
+                    float vectorY = laser.getCenterY() - asteroids.getCenterY();
+                    float vectorLength = (float) Math.sqrt(vectorX * vectorX + vectorY * vectorY);
+                    if (vectorLength < laser.getWidth() * 0.5f + asteroids.getWidth() * 0.5f) {
+                        laser.setCenterX(90.0f);
+                        laser.setCenterY(90.0f);
+                        asteroids.setDestroyed(true);
+                        asteroids.setSetupVelocity(false);
+                        g.updateModelSmall();
+                        g.setScore(g.getScore() + 100);
+                        // Set up small asteroids here.
+                        for (Sprite asteroidsSmall : g.getAsteroidsModelSmall()) {
+                            if (!asteroidsSmall.isSetupVelocity()) {
+                                asteroidsSmall.setVelocityX(rand.nextFloat() / 2);
+                                asteroidsSmall.setVelocityY(rand.nextFloat() / 2);
+                                asteroidsSmall.setCenterX(asteroids.getCenterX());
+                                asteroidsSmall.setCenterY(asteroids.getCenterY());
+                                asteroidsSmall.setSetupVelocity(true);
+                            }
                         }
                     }
                 }
@@ -159,6 +161,7 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
             g.getAsteroidsModelSmall().removeAll(toRemove);
         }
 
+        List<Sprite> toRemove = new ArrayList<>();
         for (Sprite asteroidsBig : g.getAsteroidsModelBig()) {
             // TODO: random rotations
 //            int rotation = -1;
@@ -170,11 +173,23 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
                 asteroidsBig.setVelocityY(rand.nextFloat()/2);
                 asteroidsBig.setSetupVelocity(true);
             }
+            if (asteroidsBig.isDestroyed()) {
+                asteroidsBig.setRotation(asteroidsBig.getRotation() - 20.0f);
+                asteroidsBig.setHeight(asteroidsBig.getHeight() - 0.005f);
+                asteroidsBig.setWidth(asteroidsBig.getWidth() - 0.005f);
+                if (asteroidsBig.getWidth() < 0.0f || asteroidsBig.getHeight() < 0.0f) {
+                    asteroidsBig.setDestroyed(false);
+                    asteroidsBig.setHeight(0.15f);
+                    asteroidsBig.setWidth(0.15f);
+                    toRemove.add(asteroidsBig);
+                }
+            }
 //            asteroidsBig.setRotation(asteroidsBig.getRotation() + (rotation * 20f));
             asteroidsBig.setCenterX(asteroidsBig.getCenterX() + asteroidsBig.getVelocityX() * elapsedTime);
             asteroidsBig.setCenterY(asteroidsBig.getCenterY() + asteroidsBig.getVelocityY() * elapsedTime);
             asteroidsBig.draw();
         }
+        g.getAsteroidsModelBig().removeAll(toRemove);
 
         for (Sprite asteroidsSmall : g.getAsteroidsModelSmall()) {
             // TODO: random rotations
@@ -186,6 +201,12 @@ public class MainActivity extends AppCompatActivity implements GLSurfaceView.Ren
             asteroidsSmall.setCenterX(asteroidsSmall.getCenterX() + asteroidsSmall.getVelocityX() * elapsedTime);
             asteroidsSmall.setCenterY(asteroidsSmall.getCenterY() + asteroidsSmall.getVelocityY() * elapsedTime);
             asteroidsSmall.draw();
+        }
+
+        // Check if there are no asteroids left.
+        if (g.getAsteroidsModelSmall().size() == 0 && g.getAsteroidsModelBig().size() == 0) {
+            g.setLevel(g.getLevel() + 1);
+            g.updateModelBig();
         }
     }
 
