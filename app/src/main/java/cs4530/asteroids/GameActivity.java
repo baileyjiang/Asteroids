@@ -36,6 +36,7 @@ public class GameActivity extends AppCompatActivity implements GLSurfaceView.Ren
     GLSurfaceView surfaceView = null;
     Date gameLoopLastRun = null;
 
+
 //    WorkerThread workerThread;
 //
 //    class HoldThread extends Thread {
@@ -63,6 +64,8 @@ public class GameActivity extends AppCompatActivity implements GLSurfaceView.Ren
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        GameModel.getInstance(this).resetGameModel();
 
 
         surfaceView = new GLSurfaceView(this);
@@ -168,6 +171,7 @@ public class GameActivity extends AppCompatActivity implements GLSurfaceView.Ren
                     }
                 }
                 g.getAsteroidsModelSmall().removeAll(toRemove);
+                checkGameOver();
             }
         }
 
@@ -363,8 +367,10 @@ public class GameActivity extends AppCompatActivity implements GLSurfaceView.Ren
 
         // Check if there are no asteroids left.
         if (g.getAsteroidsModelSmall().size() == 0 && g.getAsteroidsModelBig().size() == 0) {
-            g.setLevel(g.getLevel() + 1);
-            g.updateModelBig();
+            if (g.getLives() > 0) {
+                g.setLevel(g.getLevel() + 1);
+                g.updateModelBig();
+            }
         }
 
         toRemove.clear();
@@ -397,6 +403,20 @@ public class GameActivity extends AppCompatActivity implements GLSurfaceView.Ren
             }
         }
         g.getMineralModel().removeAll(toRemove);
+    }
+
+    // Checks if lives are 0
+    private void checkGameOver() {
+        GameModel g = GameModel.getInstance(this);
+        if(g.getLives() < 1) {
+            //Remove all asteroids and ship
+            g.getAsteroidsModelBig().clear();
+            g.getAsteroidsModelSmall().clear();
+            g.getGameOver().setCenterX(0.0f);
+            g.getGameOver().setCenterY(0.0f);
+            g.getShip().setCenterX(0.0f);
+            g.getShip().setCenterY(0.0f);
+        }
     }
 
     // Wraps certain sprites around if they hit an edge.
@@ -475,7 +495,53 @@ public class GameActivity extends AppCompatActivity implements GLSurfaceView.Ren
 
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
+        final GameModel g = GameModel.getInstance(this);
+        // Handle tap when game is over.
+        if (g.getLives() < 1) {
+            // Check for high score.
+            if (g.getScore() > g.getScores().get(g.getScores().size() - 1).getScore() || g.getScores().size() < 10) {
 
+                //Spawn input form
+//                final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+//                LayoutInflater li = LayoutInflater.from(this);
+//                View joinGamePrompt = li.inflate(R.layout.highscore_prompt, null);
+//                alertDialogBuilder.setView(joinGamePrompt);
+//                final EditText name = (EditText) joinGamePrompt.findViewById(R.id.nameEditText);
+//                alertDialogBuilder.setCancelable(false)
+//                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+//                            @Override
+//                            public void onClick(DialogInterface dialog, int which) {
+//                                String playerNameString = name.getText().toString();
+//                                g.addScore(playerNameString, g.getScore());
+//                                Intent gameMenu = new Intent();
+//                                gameMenu.setClass(GameActivity.this, MainActivity.class);
+//                                startActivity(gameMenu);
+//                            }
+//                        })
+//                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+//                            @Override
+//                            public void onClick(DialogInterface dialog, int which) {
+//                                dialog.cancel();
+//                            }
+//                        });
+//                AlertDialog alertDialog = alertDialogBuilder.create();
+//                alertDialog.show();
+
+                Intent gameMenu = new Intent();
+                gameMenu.setClass(GameActivity.this, MainActivity.class);
+                startActivity(gameMenu);
+                finish();
+                return true;
+
+            } else {
+                // Go back to menu.
+                Intent gameMenu = new Intent();
+                gameMenu.setClass(GameActivity.this, MainActivity.class);
+                startActivity(gameMenu);
+                finish();
+                return true;
+            }
+        }
 
 
         List<Sprite> sprites = GameModel.getInstance(this).getBaseSprites();
@@ -522,51 +588,12 @@ public class GameActivity extends AppCompatActivity implements GLSurfaceView.Ren
             ship.setRotation(ship.getRotation() - 10.0f);
         }
         if (leftArrowPress) {
-            //Spawn input form
-//            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-//            LayoutInflater li = LayoutInflater.from(this);
-//            View joinGamePrompt = li.inflate(R.layout.highscore_prompt, null);
-//            alertDialogBuilder.setView(joinGamePrompt);
-//            final EditText name = (EditText) joinGamePrompt.findViewById(R.id.nameEditText);
-//            alertDialogBuilder.setCancelable(false)
-//                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-//                        @Override
-//                        public void onClick(DialogInterface dialog, int which) {
-//                            String playerNameString = name.getText().toString();
-//                            GameManager.getInstance().joinGame(new GameManager.JoinGameListener() {
-//                                @Override
-//                                public void gameJoined(boolean success, String playerId) {
-//                                    if (success) {
-//                                        GameList.getInstance().addGameIdplayerIdMap(game.getId(), playerId);
-//                                        saveAll();
-//                                        if (onListItemSelected != null) {
-//                                            onListItemSelected.ListItemSelected(game.getId());
-//                                        } else {
-//                                            Intent showGameIntent = new Intent();
-//                                            showGameIntent.setClass(getActivity(), MainActivity.class);
-//                                            showGameIntent.putExtra("gameId", game.getId());
-//                                            startActivity(showGameIntent);
-//                                        }
-//                                    }
-//                                }
-//                            }, game, playerNameString);
-//                        }
-//                    })
-//                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-//                        @Override
-//                        public void onClick(DialogInterface dialog, int which) {
-//
-//                        }
-//                    });
-//            AlertDialog alertDialog = alertDialogBuilder.create();
-//            alertDialog.show();
-
-
             ship.setRotation(ship.getRotation() + 10.0f);
         }
         if (thrustPress) {
             if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
                 ship.accelerate();
+
                 if (GameModel.getInstance(this).isShipHasMineral()) {
                     ship.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.spaceship_shield_thrust));
                 } else {
@@ -574,6 +601,8 @@ public class GameActivity extends AppCompatActivity implements GLSurfaceView.Ren
                 }
             }
             if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                //TODO: delete this
+                g.setLives(0);
                 if (GameModel.getInstance(this).isShipHasMineral()) {
                     ship.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.spaceship_shield));
                 } else {
@@ -602,5 +631,10 @@ public class GameActivity extends AppCompatActivity implements GLSurfaceView.Ren
             }
         }
         return true;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
     }
 }
