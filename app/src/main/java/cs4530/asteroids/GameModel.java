@@ -19,6 +19,8 @@ public class GameModel {
     private List<Sprite> asteroidsSmall = new ArrayList<Sprite>();
     private List<Sprite> asteroidsModelBig = new ArrayList<Sprite>();
     private List<Sprite> asteroidsModelSmall = new ArrayList<Sprite>();
+    private List<Sprite> minerals = new ArrayList<Sprite>();
+    private List<Sprite> mineralModel = new ArrayList<Sprite>();
     private Sprite ship = null;
     private static GameModel instance = null;
     private static Context context = null;
@@ -30,6 +32,7 @@ public class GameModel {
     private Sprite scoreTextValue;
     private Sprite livesTextValue;
     private Random rand;
+    private boolean shipHasMineral = false;
 
     public static GameModel getInstance(Context c) {
         if (instance == null) {
@@ -214,6 +217,16 @@ public class GameModel {
             asteroidsSmall.add(a);
         }
 
+        for (int i = 0; i < 10; i++) {
+            Sprite mineral = new Sprite();
+            mineral.setWidth(0.15f);
+            mineral.setHeight(0.15f);
+            mineral.setCenterX(90.0f);
+            mineral.setCenterY(90.0f);
+            mineral.setTexture(BitmapFactory.decodeResource(context.getResources(), R.drawable.mineral));
+            minerals.add(mineral);
+        }
+
         asteroidsModelBig = asteroidsBig.subList(0, level);
 
     }
@@ -302,5 +315,21 @@ public class GameModel {
 
     public void updateModelBig() {
         asteroidsModelBig = asteroidsBig.subList(0, level);
+    }
+
+    public List<Sprite> getMinerals() {
+        return minerals;
+    }
+
+    public List<Sprite> getMineralModel() {
+        return mineralModel;
+    }
+
+    public boolean isShipHasMineral() {
+        return shipHasMineral;
+    }
+
+    public void setShipHasMineral(boolean shipHasMineral) {
+        this.shipHasMineral = shipHasMineral;
     }
 }
