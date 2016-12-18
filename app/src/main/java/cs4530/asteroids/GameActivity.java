@@ -99,6 +99,47 @@ public class GameActivity extends AppCompatActivity implements GLSurfaceView.Ren
         ship.setCenterX(ship.getCenterX() + ship.getVelocityX() * elapsedTime);
         ship.setCenterY(ship.getCenterY() + ship.getVelocityY() * elapsedTime);
 
+        if (ship.isDestroyed()) {
+            ship.setRotation(ship.getRotation() - 20.0f);
+            ship.setHeight(ship.getHeight() - 0.005f);
+            ship.setWidth(ship.getWidth() - 0.005f);
+            if (ship.getWidth() < 0.0f || ship.getHeight() < 0.0f) {
+                ship.setDestroyed(false);
+                g.setLives(g.getLives() - 1);
+                ship.setHeight(0.25f);
+                ship.setWidth(0.25f);
+                ship.setCenterX(0.0f);
+                ship.setCenterY(0.0f);
+                ship.setRotation(0.0f);
+                // Destroy surrounding asteroids
+
+                List<Sprite> toRemove = new ArrayList<>();
+                for (Sprite asteroid : g.getAsteroidsModelBig()) {
+                    float vectorX = ship.getCenterX() - asteroid.getCenterX();
+                    float vectorY = ship.getCenterY() - asteroid.getCenterY();
+                    float vectorLength = (float) Math.sqrt(vectorX * vectorX + vectorY * vectorY);
+                    if (vectorLength < ship.getWidth() * 1.5f + asteroid.getWidth() * 1.5f) {
+                        asteroid.setDestroyed(true);
+                        asteroid.setSetupVelocity(false);
+                        toRemove.add(asteroid);
+                    }
+                }
+                g.getAsteroidsModelBig().removeAll(toRemove);
+                toRemove.clear();
+                for (Sprite asteroid : g.getAsteroidsModelSmall()) {
+                    float vectorX = ship.getCenterX() - asteroid.getCenterX();
+                    float vectorY = ship.getCenterY() - asteroid.getCenterY();
+                    float vectorLength = (float) Math.sqrt(vectorX * vectorX + vectorY * vectorY);
+                    if (vectorLength < ship.getWidth() * 1.5f + asteroid.getWidth() * 1.5f) {
+                        asteroid.setDestroyed(true);
+                        asteroid.setSetupVelocity(false);
+                        toRemove.add(asteroid);
+                    }
+                }
+                g.getAsteroidsModelSmall().removeAll(toRemove);
+            }
+        }
+
         ship.decelerate();
         checkEdges();
         ship.draw();
@@ -141,7 +182,7 @@ public class GameActivity extends AppCompatActivity implements GLSurfaceView.Ren
                             mineral.setCenterY(asteroids.getCenterY());
                             mineral.setVelocityX(rand.nextFloat() / 2);
                             mineral.setVelocityY(rand.nextFloat() / 2);
-                            // TODO: mineral rotations
+                            mineral.setStaticRotation((rand.nextFloat() - 0.5f) * 30.0f);
                         }
                         // Set up small asteroids here.
                         for (Sprite asteroidsSmall : g.getAsteroidsModelSmall()) {
@@ -151,6 +192,7 @@ public class GameActivity extends AppCompatActivity implements GLSurfaceView.Ren
                                 asteroidsSmall.setCenterX(asteroids.getCenterX());
                                 asteroidsSmall.setCenterY(asteroids.getCenterY());
                                 asteroidsSmall.setSetupVelocity(true);
+                                asteroidsSmall.setStaticRotation((rand.nextFloat() - 0.5f) * 30.0f);
                             }
                         }
                     }
@@ -173,7 +215,7 @@ public class GameActivity extends AppCompatActivity implements GLSurfaceView.Ren
                         mineral.setCenterY(asteroids.getCenterY());
                         mineral.setVelocityX(rand.nextFloat() / 2);
                         mineral.setVelocityY(rand.nextFloat() / 2);
-                        // TODO: mineral rotations
+                        mineral.setStaticRotation((rand.nextFloat() - 0.5f) * 30.0f);
                     }
                     toRemove.add(asteroids);
                     asteroids.setSetupVelocity(false);
@@ -185,11 +227,9 @@ public class GameActivity extends AppCompatActivity implements GLSurfaceView.Ren
 
         List<Sprite> toRemove = new ArrayList<>();
         for (Sprite asteroidsBig : g.getAsteroidsModelBig()) {
-            // TODO: random rotations
-//            int rotation = -1;
-//            if (rand.nextBoolean()) {
-//                rotation = 1;
-//            }
+            if (asteroidsBig.getStaticRotation() == 0.0f) {
+                asteroidsBig.setStaticRotation((rand.nextFloat() - 0.5f) * 30.0f);
+            }
             if (!asteroidsBig.isSetupVelocity()) {
                 asteroidsBig.setVelocityX(rand.nextFloat()/2);
                 asteroidsBig.setVelocityY(rand.nextFloat()/2);
@@ -206,24 +246,87 @@ public class GameActivity extends AppCompatActivity implements GLSurfaceView.Ren
                     toRemove.add(asteroidsBig);
                 }
             }
-//            asteroidsBig.setRotation(asteroidsBig.getRotation() + (rotation * 20f));
+            // Check if a ship collision has occurred
+            float vectorX = ship.getCenterX() - asteroidsBig.getCenterX();
+            float vectorY = ship.getCenterY() - asteroidsBig.getCenterY();
+            float vectorLength = (float) Math.sqrt(vectorX * vectorX + vectorY * vectorY);
+            if (vectorLength < ship.getWidth() * 0.5f + asteroidsBig.getWidth() * 0.5f) {
+                if (g.isShipHasMineral()) {
+                    ship.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.spaceship));
+                    g.setShipHasMineral(false);
+                    asteroidsBig.setDestroyed(true);
+                    asteroidsBig.setSetupVelocity(false);
+                    g.updateModelSmall();
+                    g.setScore(g.getScore() + 100);
+                    // Spawn mineral
+                    if (rand.nextInt(100) > 95) {
+                        g.getMineralModel().add(g.getMinerals().get(g.getMineralModel().size()));
+                        Sprite mineral = g.getMineralModel().get(g.getMineralModel().size() - 1);
+                        mineral.setCenterX(asteroidsBig.getCenterX());
+                        mineral.setCenterY(asteroidsBig.getCenterY());
+                        mineral.setVelocityX(rand.nextFloat() / 2);
+                        mineral.setVelocityY(rand.nextFloat() / 2);
+                        mineral.setStaticRotation((rand.nextFloat() - 0.5f) * 30.0f);
+                    }
+                    // Set up small asteroids here.
+                    for (Sprite asteroidsSmall : g.getAsteroidsModelSmall()) {
+                        if (!asteroidsSmall.isSetupVelocity()) {
+                            asteroidsSmall.setVelocityX(rand.nextFloat() / 2);
+                            asteroidsSmall.setVelocityY(rand.nextFloat() / 2);
+                            asteroidsSmall.setCenterX(asteroidsBig.getCenterX());
+                            asteroidsSmall.setCenterY(asteroidsBig.getCenterY());
+                            asteroidsSmall.setSetupVelocity(true);
+                            asteroidsSmall.setStaticRotation((rand.nextFloat() - 0.5f) * 30.0f);
+                        }
+                    }
+
+                }
+                else {
+                    ship.setDestroyed(true);
+                }
+            }
+
+            asteroidsBig.setRotation(asteroidsBig.getRotation() + asteroidsBig.getStaticRotation());
             asteroidsBig.setCenterX(asteroidsBig.getCenterX() + asteroidsBig.getVelocityX() * elapsedTime);
             asteroidsBig.setCenterY(asteroidsBig.getCenterY() + asteroidsBig.getVelocityY() * elapsedTime);
             asteroidsBig.draw();
         }
         g.getAsteroidsModelBig().removeAll(toRemove);
 
+        toRemove.clear();
         for (Sprite asteroidsSmall : g.getAsteroidsModelSmall()) {
-            // TODO: random rotations
-//            int rotation = -1;
-//            if (rand.nextBoolean()) {
-//                rotation = 1;
-//            }
-//            asteroidsBig.setRotation(asteroidsBig.getRotation() + (rotation * 20f));
+            // Check if a ship collision has occurred
+            float vectorX = ship.getCenterX() - asteroidsSmall.getCenterX();
+            float vectorY = ship.getCenterY() - asteroidsSmall.getCenterY();
+            float vectorLength = (float) Math.sqrt(vectorX * vectorX + vectorY * vectorY);
+            if (vectorLength < ship.getWidth() * 0.5f + asteroidsSmall.getWidth() * 0.5f) {
+                if (g.isShipHasMineral()) {
+                    ship.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.spaceship));
+                    g.setShipHasMineral(false);
+                    if (rand.nextInt(100) > 95) {
+                        g.getMineralModel().add(g.getMinerals().get(g.getMineralModel().size()));
+                        Sprite mineral = g.getMineralModel().get(g.getMineralModel().size() - 1);
+                        mineral.setCenterX(asteroidsSmall.getCenterX());
+                        mineral.setCenterY(asteroidsSmall.getCenterY());
+                        mineral.setVelocityX(rand.nextFloat() / 2);
+                        mineral.setVelocityY(rand.nextFloat() / 2);
+                        mineral.setStaticRotation((rand.nextFloat() - 0.5f) * 30.0f);
+                    }
+                    toRemove.add(asteroidsSmall);
+                    asteroidsSmall.setSetupVelocity(false);
+                    g.setScore(g.getScore() + 50);
+
+                }
+                else {
+                    ship.setDestroyed(true);
+                }
+            }
+            asteroidsSmall.setRotation(asteroidsSmall.getRotation() + asteroidsSmall.getStaticRotation());
             asteroidsSmall.setCenterX(asteroidsSmall.getCenterX() + asteroidsSmall.getVelocityX() * elapsedTime);
             asteroidsSmall.setCenterY(asteroidsSmall.getCenterY() + asteroidsSmall.getVelocityY() * elapsedTime);
             asteroidsSmall.draw();
         }
+        g.getAsteroidsModelSmall().removeAll(toRemove);
 
         // Check if there are no asteroids left.
         if (g.getAsteroidsModelSmall().size() == 0 && g.getAsteroidsModelBig().size() == 0) {
@@ -231,25 +334,36 @@ public class GameActivity extends AppCompatActivity implements GLSurfaceView.Ren
             g.updateModelBig();
         }
 
+        toRemove.clear();
         for (Sprite minerals : g.getMineralModel()) {
             minerals.setCenterX(minerals.getCenterX() + minerals.getVelocityX() * elapsedTime);
             minerals.setCenterY(minerals.getCenterY() + minerals.getVelocityY() * elapsedTime);
+            minerals.setRotation(minerals.getRotation() + minerals.getStaticRotation());
 
             //Check if ship collides with mineral.
             float vectorX = ship.getCenterX() - minerals.getCenterX();
             float vectorY = ship.getCenterY() - minerals.getCenterY();
             float vectorLength = (float) Math.sqrt(vectorX * vectorX + vectorY * vectorY);
             if (vectorLength < ship.getWidth() * 0.5f + minerals.getWidth() * 0.5f) {
-                g.setShipHasMineral(true);
-                ship.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.spaceship_shield));
-                g.getMineralModel().remove(minerals);
-                minerals.setCenterX(90.0f);
-                minerals.setCenterY(90.0f);
+                if (g.isShipHasMineral()) {
+                    g.setScore(g.getScore() + 300);
+                    toRemove.add(minerals);
+                    minerals.setCenterX(90.0f);
+                    minerals.setCenterY(90.0f);
+                }
+                else {
+                    g.setShipHasMineral(true);
+                    ship.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.spaceship_shield));
+                    toRemove.add(minerals);
+                    minerals.setCenterX(90.0f);
+                    minerals.setCenterY(90.0f);
+                }
             }
             else {
                 minerals.draw();
             }
         }
+        g.getMineralModel().removeAll(toRemove);
     }
 
     // Wraps certain sprites around if they hit an edge.

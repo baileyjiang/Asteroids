@@ -67,14 +67,8 @@ public class Sprite {
     private int textureName = -1;
     private boolean setupVelocity = false;
     private boolean isDestroyed = false;
-//    private Context context;
-//
-//    //TODO: Dlete this
-//    String tag;
-//
-//    public Sprite(Context context) {
-//        this.context = context;
-//    }
+    private float staticRotation = 0.0f;
+
 
     private static int program = -1;
 
@@ -136,6 +130,14 @@ public class Sprite {
 
     public void setVelocityY(float velocityY) {
         this.velocityY = velocityY;
+    }
+
+    public float getStaticRotation() {
+        return staticRotation;
+    }
+
+    public void setStaticRotation(float staticRotation) {
+        this.staticRotation = staticRotation;
     }
 
     public boolean isDestroyed() {
