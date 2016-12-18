@@ -28,5 +28,15 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(newGameIntent);
             }
         });
+
+        Button highScore = (Button) findViewById(R.id.high_score);
+        highScore.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent newHighScoreIntent = new Intent();
+                newHighScoreIntent.setClass(MainActivity.this, HighScoreActivity.class);
+                startActivity(newHighScoreIntent);
+            }
+        });
     }
 }

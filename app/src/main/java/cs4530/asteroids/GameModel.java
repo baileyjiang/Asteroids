@@ -21,6 +21,7 @@ public class GameModel {
     private List<Sprite> asteroidsModelSmall = new ArrayList<Sprite>();
     private List<Sprite> minerals = new ArrayList<Sprite>();
     private List<Sprite> mineralModel = new ArrayList<Sprite>();
+    private List<Score> scores = new ArrayList<Score>();
     private Sprite ship = null;
     private static GameModel instance = null;
     private static Context context = null;
@@ -229,6 +230,22 @@ public class GameModel {
 
         asteroidsModelBig = asteroidsBig.subList(0, level);
 
+        //TODO delete later
+        Score s = new Score();
+        s.setName("Test");
+        s.setScore(100);
+        scores.add(s);
+
+        s = new Score();
+        s.setName("Test2");
+        s.setScore(200);
+        scores.add(s);
+
+        s = new Score();
+        s.setName("Test3");
+        s.setScore(150);
+        scores.add(s);
+
     }
 
     public List<Sprite> getBaseSprites() {
@@ -331,5 +348,9 @@ public class GameModel {
 
     public void setShipHasMineral(boolean shipHasMineral) {
         this.shipHasMineral = shipHasMineral;
+    }
+
+    public List<Score> getScores() {
+        return scores;
     }
 }

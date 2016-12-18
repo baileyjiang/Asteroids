@@ -1,14 +1,21 @@
 package cs4530.asteroids;
 
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
+import android.support.annotation.WorkerThread;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.GestureDetector;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.EditText;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -28,6 +35,30 @@ public class GameActivity extends AppCompatActivity implements GLSurfaceView.Ren
     float ratio = -1;
     GLSurfaceView surfaceView = null;
     Date gameLoopLastRun = null;
+
+//    WorkerThread workerThread;
+//
+//    class HoldThread extends Thread {
+//        private volatile boolean stopped = false;
+//        private volatile int action;
+//        private volatile Context context;
+//
+//        public void setAction(int action) {
+//            this.action = action;
+//        }
+//
+//        @Override
+//        public void run() {
+//            super.run();
+//            while (!stopped) {
+//                // Shoot
+//                if (action == 1) {
+//                    GameModel.getInstance().getShip().accelerate();
+//                }
+//            }
+//        }
+//    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -234,6 +265,8 @@ public class GameActivity extends AppCompatActivity implements GLSurfaceView.Ren
                 asteroidsBig.setVelocityX(rand.nextFloat()/2);
                 asteroidsBig.setVelocityY(rand.nextFloat()/2);
                 asteroidsBig.setSetupVelocity(true);
+                asteroidsBig.setCenterX((rand.nextFloat() - 0.50f) * 100.0f);
+                asteroidsBig.setCenterY(((rand.nextFloat() - 0.50f) * 2.0f));
             }
             if (asteroidsBig.isDestroyed()) {
                 asteroidsBig.setRotation(asteroidsBig.getRotation() - 20.0f);
@@ -443,6 +476,8 @@ public class GameActivity extends AppCompatActivity implements GLSurfaceView.Ren
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
 
+
+
         List<Sprite> sprites = GameModel.getInstance(this).getBaseSprites();
 
 
@@ -452,6 +487,8 @@ public class GameActivity extends AppCompatActivity implements GLSurfaceView.Ren
         Sprite leftArrow = sprites.get(1);
         Sprite thrust = sprites.get(2);
         Sprite shoot = sprites.get(3);
+
+
 
         float x = motionEvent.getX();
         float y = motionEvent.getY();
@@ -473,30 +510,63 @@ public class GameActivity extends AppCompatActivity implements GLSurfaceView.Ren
 
         float shootCenterY = ((shoot.getCenterY() - 1.0f) * -0.5f) * metrics.heightPixels;
         float shootCenterX = ((shoot.getCenterX() * ratio + 1.0f) * 0.5f) * metrics.widthPixels;
-        float shootWidth = shoot.getWidth() * metrics.widthPixels;
-        float shootHeight = shoot.getHeight() * (metrics.heightPixels);
+        float shootWidth = 256.0f;
+        float shootHeight = 256.0f;
+
 
         boolean rightArrowPress = x >= rightArrowCenterX - rightArrowWidth/2 && x <= rightArrowCenterX + rightArrowWidth/2 && y >= rightArrowCenterY - rightArrowHeight/2 && y <= rightArrowCenterY + rightArrowHeight/2;
         boolean leftArrowPress = x >= leftArrowCenterX - leftArrowWidth/2 && x <= leftArrowCenterX + leftArrowWidth/2 && y >= leftArrowCenterY - leftArrowHeight/2 && y <= leftArrowCenterY + leftArrowHeight/2;
         boolean thrustPress = x >= thrustCenterX - thrustWidth/2 && x <= thrustCenterX + thrustWidth/2 && y >= thrustCenterY - thrustHeight/2 && y <= thrustCenterY + thrustHeight/2;
         boolean shootPress = x >= shootCenterX - shootWidth/2 && x <= shootCenterX + shootWidth/2 && y >= shootCenterY - shootHeight/2 && y <= shootCenterY + shootHeight/2;
         if (rightArrowPress) {
-//            Log.i("EVENT", "Starting..");
-//            Log.i("EVENT", "Angle: " + ship.getRotation());
-//            Log.i("EVENT", "X value: " + ship.getCenterX());
-//            Log.i("EVENT", "Y value: " + ship.getCenterY());
-            ship.setRotation(ship.getRotation() - 5.0f);
+            ship.setRotation(ship.getRotation() - 10.0f);
         }
         if (leftArrowPress) {
-//            Log.i("EVENT", "Starting..");
-//            Log.i("EVENT", "Angle: " + ship.getRotation());
-//            Log.i("EVENT", "X value: " + ship.getCenterX());
-//            Log.i("EVENT", "Y value: " + ship.getCenterY());
-            ship.setRotation(ship.getRotation() + 5.0f);
+            //Spawn input form
+//            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+//            LayoutInflater li = LayoutInflater.from(this);
+//            View joinGamePrompt = li.inflate(R.layout.highscore_prompt, null);
+//            alertDialogBuilder.setView(joinGamePrompt);
+//            final EditText name = (EditText) joinGamePrompt.findViewById(R.id.nameEditText);
+//            alertDialogBuilder.setCancelable(false)
+//                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+//                        @Override
+//                        public void onClick(DialogInterface dialog, int which) {
+//                            String playerNameString = name.getText().toString();
+//                            GameManager.getInstance().joinGame(new GameManager.JoinGameListener() {
+//                                @Override
+//                                public void gameJoined(boolean success, String playerId) {
+//                                    if (success) {
+//                                        GameList.getInstance().addGameIdplayerIdMap(game.getId(), playerId);
+//                                        saveAll();
+//                                        if (onListItemSelected != null) {
+//                                            onListItemSelected.ListItemSelected(game.getId());
+//                                        } else {
+//                                            Intent showGameIntent = new Intent();
+//                                            showGameIntent.setClass(getActivity(), MainActivity.class);
+//                                            showGameIntent.putExtra("gameId", game.getId());
+//                                            startActivity(showGameIntent);
+//                                        }
+//                                    }
+//                                }
+//                            }, game, playerNameString);
+//                        }
+//                    })
+//                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+//                        @Override
+//                        public void onClick(DialogInterface dialog, int which) {
+//
+//                        }
+//                    });
+//            AlertDialog alertDialog = alertDialogBuilder.create();
+//            alertDialog.show();
+
+
+            ship.setRotation(ship.getRotation() + 10.0f);
         }
         if (thrustPress) {
-            ship.accelerate();
             if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                ship.accelerate();
                 if (GameModel.getInstance(this).isShipHasMineral()) {
                     ship.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.spaceship_shield_thrust));
                 } else {
@@ -510,26 +580,25 @@ public class GameActivity extends AppCompatActivity implements GLSurfaceView.Ren
                     ship.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.spaceship));
                 }
             }
+
         }
         if (shootPress) {
-//            Log.i("EVENT", "shoot");
-//            Sprite bullet = new Sprite();
-//            bullet.setHeight(0.25f);
-//            bullet.setWidth(0.25f);
-            Sprite bullet = GameModel.getInstance(this).getOutOfPositionLaser();
-            if (bullet != null) {
-                bullet.setCenterX(ship.getCenterX());
-                bullet.setCenterY(ship.getCenterY());
-                float tempAngle = ship.getRotation();
-                bullet.setRotation(tempAngle);
-                tempAngle += 90;
-                if (tempAngle >= 360.0f) {
-                    tempAngle = tempAngle - 360.0f;
-                }
-                tempAngle = (float) Math.toRadians(tempAngle);
+            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                Sprite bullet = GameModel.getInstance(this).getOutOfPositionLaser();
+                if (bullet != null) {
+                    bullet.setCenterX(ship.getCenterX());
+                    bullet.setCenterY(ship.getCenterY());
+                    float tempAngle = ship.getRotation();
+                    bullet.setRotation(tempAngle);
+                    tempAngle += 90;
+                    if (tempAngle >= 360.0f) {
+                        tempAngle = tempAngle - 360.0f;
+                    }
+                    tempAngle = (float) Math.toRadians(tempAngle);
 
-                bullet.setCenterX(ship.getCenterX() + ((float) Math.cos((double) tempAngle) * 0.1f));
-                bullet.setCenterY(ship.getCenterY() + ((float) Math.sin((double) tempAngle) * 0.1f));
+                    bullet.setCenterX(ship.getCenterX() + ((float) Math.cos((double) tempAngle) * 0.1f));
+                    bullet.setCenterY(ship.getCenterY() + ((float) Math.sin((double) tempAngle) * 0.1f));
+                }
             }
         }
         return true;
