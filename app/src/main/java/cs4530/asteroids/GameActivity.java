@@ -65,9 +65,6 @@ public class GameActivity extends AppCompatActivity implements GLSurfaceView.Ren
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        GameModel.getInstance(this).resetGameModel();
-
-
         surfaceView = new GLSurfaceView(this);
         surfaceView.setEGLContextClientVersion(2);
         surfaceView.setEGLConfigChooser(8, 8, 8, 8, 0, 0);
@@ -502,36 +499,32 @@ public class GameActivity extends AppCompatActivity implements GLSurfaceView.Ren
             if (g.getScore() > g.getScores().get(g.getScores().size() - 1).getScore() || g.getScores().size() < 10) {
 
                 //Spawn input form
-//                final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-//                LayoutInflater li = LayoutInflater.from(this);
-//                View joinGamePrompt = li.inflate(R.layout.highscore_prompt, null);
-//                alertDialogBuilder.setView(joinGamePrompt);
-//                final EditText name = (EditText) joinGamePrompt.findViewById(R.id.nameEditText);
-//                alertDialogBuilder.setCancelable(false)
-//                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-//                            @Override
-//                            public void onClick(DialogInterface dialog, int which) {
-//                                String playerNameString = name.getText().toString();
-//                                g.addScore(playerNameString, g.getScore());
-//                                Intent gameMenu = new Intent();
-//                                gameMenu.setClass(GameActivity.this, MainActivity.class);
-//                                startActivity(gameMenu);
-//                            }
-//                        })
-//                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-//                            @Override
-//                            public void onClick(DialogInterface dialog, int which) {
-//                                dialog.cancel();
-//                            }
-//                        });
-//                AlertDialog alertDialog = alertDialogBuilder.create();
-//                alertDialog.show();
-
-                Intent gameMenu = new Intent();
-                gameMenu.setClass(GameActivity.this, MainActivity.class);
-                startActivity(gameMenu);
-                finish();
-                return true;
+                final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+                LayoutInflater li = LayoutInflater.from(this);
+                View joinGamePrompt = li.inflate(R.layout.highscore_prompt, null);
+                alertDialogBuilder.setView(joinGamePrompt);
+                final EditText name = (EditText) joinGamePrompt.findViewById(R.id.nameEditText);
+                alertDialogBuilder.setCancelable(false)
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                String playerNameString = name.getText().toString();
+                                g.addScore(playerNameString, g.getScore());
+                                Intent gameMenu = new Intent();
+                                gameMenu.setClass(GameActivity.this, MainActivity.class);
+                                startActivity(gameMenu);
+                                dialog.dismiss();
+                                finish();
+                            }
+                        })
+                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                            }
+                        });
+                AlertDialog alertDialog = alertDialogBuilder.create();
+                alertDialog.show();
 
             } else {
                 // Go back to menu.
@@ -636,5 +629,7 @@ public class GameActivity extends AppCompatActivity implements GLSurfaceView.Ren
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        GameModel.getInstance(this).resetGameModel();
+        Sprite.reset();
     }
 }

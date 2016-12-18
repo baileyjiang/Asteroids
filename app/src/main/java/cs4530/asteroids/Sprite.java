@@ -83,6 +83,17 @@ public class Sprite {
 
     private static boolean setup = false;
 
+    public static void reset() {
+        program = -1;
+
+        translateUniformLocation = -1;
+        scaleUniformLocation = -1;
+        textureUnitUniformLocation = -1;
+         angleUniformLocation = -1;
+         rotateMatrixUniformLocation = -1;
+         setup = false;
+    }
+
 
     public float getCenterX() {
         return translateX;

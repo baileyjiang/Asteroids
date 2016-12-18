@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.util.DisplayMetrics;
 
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -47,7 +48,7 @@ public class GameModel {
     }
 
     public void resetGameModel() {
-        instance = new GameModel();
+        instance = null;
     }
 
     private GameModel() {
@@ -378,5 +379,19 @@ public class GameModel {
 
     public Sprite getGameOver() {
         return gameOver;
+    }
+
+    
+
+    public void saveAll() {
+        String FILENAME = "games";
+        Gson gson = new Gson();
+        String json = gson.toJson();
+        try {
+            FileOutputStream fos = getActivity().openFileOutput(FILENAME, Context.MODE_PRIVATE);
+            fos.write(json.getBytes());
+            fos.close();
+        } catch (Exception e) {
+        }
     }
 }
