@@ -3,6 +3,7 @@ package cs4530.asteroids;
 import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.util.DisplayMetrics;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -29,6 +30,7 @@ public class GameModel {
     private List<Sprite> minerals = new ArrayList<Sprite>();
     private List<Sprite> mineralModel = new ArrayList<Sprite>();
     private List<Score> scores = new ArrayList<Score>();
+    private GameState gameState;
     private Sprite ship = null;
     private static GameModel instance = null;
     private static Context context = null;
@@ -58,7 +60,6 @@ public class GameModel {
     private GameModel() {
         ratio = ((float)context.getResources().getDisplayMetrics().heightPixels / (float)context.getResources().getDisplayMetrics().widthPixels);
 
-        loadAll();
 
         Sprite ship = new Sprite();
         ship.setWidth(0.25f);
@@ -150,24 +151,6 @@ public class GameModel {
             minerals.add(mineral);
         }
 
-        asteroidsModelBig = asteroidsBig.subList(0, level);
-
-        //TODO delete later
-        Score s = new Score();
-        s.setName("Test");
-        s.setScore(100);
-        scores.add(s);
-
-        s = new Score();
-        s.setName("Test2");
-        s.setScore(200);
-        scores.add(s);
-
-        s = new Score();
-        s.setName("Test3");
-        s.setScore(150);
-        scores.add(s);
-
 
         Sprite rightArrow = new Sprite();
         rightArrow.setWidth(0.25f);
@@ -257,6 +240,11 @@ public class GameModel {
         gameOver.setTexture(BitmapFactory.decodeResource(context.getResources(), R.drawable.game_over));
         baseSprites.add(gameOver);
 
+
+        loadAll();
+        loadScores();
+
+        asteroidsModelBig = asteroidsBig.subList(0, level);
 
     }
 
@@ -391,8 +379,13 @@ public class GameModel {
         this.scores = scores;
     }
 
+    public GameState getGameState() {
+        return gameState;
+    }
+
     public void saveAll() {
-        GameState gs = new GameState(score, lives, level, scores);
+        boolean valid = lives > 0;
+        GameState gs = new GameState(score, lives, level, scores, valid);
         String FILENAME = "gamestate";
         Gson gson = new Gson();
         String json = gson.toJson(gs);
@@ -454,13 +447,15 @@ public class GameModel {
             json = sb.toString();
             GameState gameState = gson.fromJson(json, new TypeToken<GameState>(){}.getType());
             if (gameState != null) {
-                this.setLives(gameState.getLives());
-                this.setScore(gameState.getScore());
-                this.setLevel(gameState.getLevel());
-                this.setScores(gameState.getScores());
+                if (gameState.isValid()) {
+                    this.gameState = gameState;
+                    this.setLives(gameState.getLives());
+                    this.setScore(gameState.getScore());
+                    this.setLevel(gameState.getLevel());
+                }
             }
         } catch (Exception e) {
-
+            Log.i("A", "error: " + e);
         }
     }
 }

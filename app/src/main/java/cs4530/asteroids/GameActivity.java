@@ -15,6 +15,8 @@ import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.EditText;
 
 import java.util.ArrayList;
@@ -35,36 +37,11 @@ public class GameActivity extends AppCompatActivity implements GLSurfaceView.Ren
     float ratio = -1;
     GLSurfaceView surfaceView = null;
     Date gameLoopLastRun = null;
-
-
-//    WorkerThread workerThread;
-//
-//    class HoldThread extends Thread {
-//        private volatile boolean stopped = false;
-//        private volatile int action;
-//        private volatile Context context;
-//
-//        public void setAction(int action) {
-//            this.action = action;
-//        }
-//
-//        @Override
-//        public void run() {
-//            super.run();
-//            while (!stopped) {
-//                // Shoot
-//                if (action == 1) {
-//                    GameModel.getInstance().getShip().accelerate();
-//                }
-//            }
-//        }
-//    }
-
+    AlertDialog alertDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         surfaceView = new GLSurfaceView(this);
         surfaceView.setEGLContextClientVersion(2);
         surfaceView.setEGLConfigChooser(8, 8, 8, 8, 0, 0);
@@ -497,7 +474,6 @@ public class GameActivity extends AppCompatActivity implements GLSurfaceView.Ren
         if (g.getLives() < 1) {
             // Check for high score.
             if (g.getScore() > g.getScores().get(g.getScores().size() - 1).getScore() || g.getScores().size() < 10) {
-
                 //Spawn input form
                 final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
                 LayoutInflater li = LayoutInflater.from(this);
@@ -523,7 +499,7 @@ public class GameActivity extends AppCompatActivity implements GLSurfaceView.Ren
                                 dialog.cancel();
                             }
                         });
-                AlertDialog alertDialog = alertDialogBuilder.create();
+                alertDialog = alertDialogBuilder.create();
                 alertDialog.show();
 
             } else {
@@ -569,8 +545,15 @@ public class GameActivity extends AppCompatActivity implements GLSurfaceView.Ren
 
         float shootCenterY = ((shoot.getCenterY() - 1.0f) * -0.5f) * metrics.heightPixels;
         float shootCenterX = ((shoot.getCenterX() * ratio + 1.0f) * 0.5f) * metrics.widthPixels;
-        float shootWidth = 256.0f;
-        float shootHeight = 256.0f;
+        float shootWidth = shoot.getWidth() * metrics.widthPixels;
+        float shootHeight = shoot.getHeight() * metrics.heightPixels;
+
+        Log.i("A", "Click Y: " + motionEvent.getY());
+        Log.i("A", "shootCenterY: " + shootCenterY);
+        Log.i("A", "shoot.centerY: " + shoot.getCenterY());
+        Log.i("A", "shoot height: " + shootHeight);
+        Log.i("A", "shoot.getHeight: " + shoot.getHeight());
+
 
 
         boolean rightArrowPress = x >= rightArrowCenterX - rightArrowWidth/2 && x <= rightArrowCenterX + rightArrowWidth/2 && y >= rightArrowCenterY - rightArrowHeight/2 && y <= rightArrowCenterY + rightArrowHeight/2;
@@ -594,8 +577,6 @@ public class GameActivity extends AppCompatActivity implements GLSurfaceView.Ren
                 }
             }
             if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                //TODO: delete this
-                g.setLives(0);
                 if (GameModel.getInstance(this).isShipHasMineral()) {
                     ship.setTexture(BitmapFactory.decodeResource(getResources(), R.drawable.spaceship_shield));
                 } else {
@@ -630,6 +611,7 @@ public class GameActivity extends AppCompatActivity implements GLSurfaceView.Ren
     protected void onDestroy() {
         super.onDestroy();
         GameModel.getInstance(this).saveScores();
+        GameModel.getInstance(this).saveAll();
         GameModel.getInstance(this).resetGameModel();
         Sprite.reset();
     }
@@ -637,6 +619,10 @@ public class GameActivity extends AppCompatActivity implements GLSurfaceView.Ren
     @Override
     protected void onPause() {
         super.onPause();
-        GameModel.getInstance(this).saveAll();
+        if (alertDialog != null && alertDialog.isShowing()) {
+            alertDialog.dismiss();
+        }
+        finish();
+        Sprite.reset();
     }
 }

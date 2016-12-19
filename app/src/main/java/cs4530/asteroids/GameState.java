@@ -12,12 +12,14 @@ public class GameState {
     private int lives;
     private int level;
     private List<Score> scores;
+    private boolean valid;
 
-    public GameState(int score, int lives, int level, List<Score> scores) {
+    public GameState(int score, int lives, int level, List<Score> scores, boolean valid) {
         this.score = score;
         this.lives = lives;
         this.level = level;
         this.scores = scores;
+        this.valid = valid;
     }
 
     public int getScore() {
@@ -50,5 +52,13 @@ public class GameState {
 
     public void setScores(List<Score> scores) {
         this.scores = scores;
+    }
+
+    public boolean isValid() {
+        return valid;
+    }
+
+    public void setValid(boolean valid) {
+        this.valid = valid;
     }
 }
