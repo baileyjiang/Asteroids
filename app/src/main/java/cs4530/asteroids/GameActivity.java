@@ -629,7 +629,14 @@ public class GameActivity extends AppCompatActivity implements GLSurfaceView.Ren
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        GameModel.getInstance(this).saveScores();
         GameModel.getInstance(this).resetGameModel();
         Sprite.reset();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        GameModel.getInstance(this).saveAll();
     }
 }

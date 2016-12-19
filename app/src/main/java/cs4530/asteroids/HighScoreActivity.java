@@ -25,6 +25,7 @@ public class HighScoreActivity extends AppCompatActivity implements ListAdapter 
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.highscore_view);
+        GameModel.getInstance(this).loadScores();
 
         scores = (ListView) findViewById(R.id.list_view);
         scores.setAdapter(this);

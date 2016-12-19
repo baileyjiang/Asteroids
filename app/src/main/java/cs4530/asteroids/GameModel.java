@@ -4,6 +4,10 @@ import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.util.DisplayMetrics;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,6 +57,8 @@ public class GameModel {
 
     private GameModel() {
         ratio = ((float)context.getResources().getDisplayMetrics().heightPixels / (float)context.getResources().getDisplayMetrics().widthPixels);
+
+        loadAll();
 
         Sprite ship = new Sprite();
         ship.setWidth(0.25f);
@@ -381,17 +387,80 @@ public class GameModel {
         return gameOver;
     }
 
-    
+    private void setScores(List<Score> scores) {
+        this.scores = scores;
+    }
 
     public void saveAll() {
-        String FILENAME = "games";
+        GameState gs = new GameState(score, lives, level, scores);
+        String FILENAME = "gamestate";
         Gson gson = new Gson();
-        String json = gson.toJson();
+        String json = gson.toJson(gs);
         try {
-            FileOutputStream fos = getActivity().openFileOutput(FILENAME, Context.MODE_PRIVATE);
+            FileOutputStream fos = context.openFileOutput(FILENAME, Context.MODE_PRIVATE);
             fos.write(json.getBytes());
             fos.close();
         } catch (Exception e) {
+        }
+    }
+
+    public void saveScores() {
+        String FILENAME = "scores";
+        Gson gson = new Gson();
+        String json = gson.toJson(scores);
+        try {
+            FileOutputStream fos = context.openFileOutput(FILENAME, Context.MODE_PRIVATE);
+            fos.write(json.getBytes());
+            fos.close();
+        } catch (Exception e) {
+        }
+    }
+
+    public void loadScores() {
+        Gson gson = new Gson();
+        String FILENAME = "scores";
+        try {
+            FileInputStream fis = context.openFileInput(FILENAME);
+            String json = "";
+            StringBuilder sb = new StringBuilder();
+            int ch = 0;
+            while ((ch = fis.read()) != -1) {
+                sb.append((char) ch);
+            }
+            json = sb.toString();
+            List<Score> s = gson.fromJson(json, new TypeToken<List<Score>>(){}.getType());
+            if (s != null) {
+                if (s.size() != 0) {
+                    scores.clear();
+                    scores.addAll(s);
+                }
+            }
+        } catch (Exception e) {
+
+        }
+    }
+
+    public void loadAll() {
+        Gson gson = new Gson();
+        String FILENAME = "gamestate";
+        try {
+            FileInputStream fis = context.openFileInput(FILENAME);
+            String json = "";
+            StringBuilder sb = new StringBuilder();
+            int ch = 0;
+            while ((ch = fis.read()) != -1) {
+                sb.append((char) ch);
+            }
+            json = sb.toString();
+            GameState gameState = gson.fromJson(json, new TypeToken<GameState>(){}.getType());
+            if (gameState != null) {
+                this.setLives(gameState.getLives());
+                this.setScore(gameState.getScore());
+                this.setLevel(gameState.getLevel());
+                this.setScores(gameState.getScores());
+            }
+        } catch (Exception e) {
+
         }
     }
 }
