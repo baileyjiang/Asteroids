@@ -1,24 +1,16 @@
 package cs4530.asteroids;
 
-import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.ColorFilter;
 import android.graphics.Paint;
-import android.graphics.drawable.Drawable;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
 import android.opengl.Matrix;
 import android.util.Log;
-
-import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
-import java.text.DecimalFormat;
 
 /**
  * Created by blyjng on 12/3/16.
@@ -28,19 +20,10 @@ public class Sprite {
 
     // Create quad
     private static final float[] quadGeometry = {
-//            -0.5f, -0.5f,
-//            0.5f, -0.5f,
-//            -0.5f, 0.5f,
-//            0.5f, 0.5f,
-
             -0.5f, -0.5f,
             0.5f, -0.5f,
             -0.5f, 0.5f,
             0.5f, 0.5f,
-
-
-//            0.5f, 0.5f5f,
-
     };
 
     //interpolated color
@@ -85,13 +68,12 @@ public class Sprite {
 
     public static void reset() {
         program = -1;
-
         translateUniformLocation = -1;
         scaleUniformLocation = -1;
         textureUnitUniformLocation = -1;
-         angleUniformLocation = -1;
-         rotateMatrixUniformLocation = -1;
-         setup = false;
+        angleUniformLocation = -1;
+        rotateMatrixUniformLocation = -1;
+        setup = false;
     }
 
 
@@ -166,8 +148,6 @@ public class Sprite {
     public void setTexture(Bitmap texture) {
         this.texture = texture;
         if (textureName != -1) {
-//            int[] doomedTextures = {textureName};
-//            GLES20.glDeleteTextures(GLES20.GL_TEXTURE_2D, doomedTextures, 0);
             textureName = -1;
         }
     }

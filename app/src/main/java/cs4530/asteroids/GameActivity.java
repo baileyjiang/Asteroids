@@ -5,33 +5,23 @@ import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
-import android.support.annotation.WorkerThread;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
-import android.util.Log;
-import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.EditText;
-
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 public class GameActivity extends AppCompatActivity implements GLSurfaceView.Renderer, View.OnTouchListener {
 
-//    List<Sprite> sprites = new ArrayList<>();
-    List<Sprite> lasers = new ArrayList<>();
     List<Sprite> asteroids = new ArrayList<>();
     DisplayMetrics metrics = null;
     float ratio = -1;
@@ -42,6 +32,7 @@ public class GameActivity extends AppCompatActivity implements GLSurfaceView.Ren
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         surfaceView = new GLSurfaceView(this);
         surfaceView.setEGLContextClientVersion(2);
         surfaceView.setEGLConfigChooser(8, 8, 8, 8, 0, 0);
@@ -91,12 +82,12 @@ public class GameActivity extends AppCompatActivity implements GLSurfaceView.Ren
     public void onDrawFrame(GL10 gl10) {
         // Clear frame first
         GLES20.glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-//        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
         GLES20.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
 
         if (gameLoopLastRun == null) {
             gameLoopLastRun = new Date();
         }
+
         Date now = new Date();
         float elapsedTime = (float) (now.getTime() - gameLoopLastRun.getTime()) / 1000.0f;
         gameLoopLastRun = now;
@@ -120,7 +111,6 @@ public class GameActivity extends AppCompatActivity implements GLSurfaceView.Ren
                 ship.setCenterY(0.0f);
                 ship.setRotation(0.0f);
                 // Destroy surrounding asteroids
-
                 List<Sprite> toRemove = new ArrayList<>();
                 for (Sprite asteroid : g.getAsteroidsModelBig()) {
                     float vectorX = ship.getCenterX() - asteroid.getCenterX();
@@ -216,7 +206,6 @@ public class GameActivity extends AppCompatActivity implements GLSurfaceView.Ren
                 if (vectorLength < laser.getWidth() * 0.5f + asteroids.getWidth() * 0.5f) {
                     laser.setCenterX(90.0f);
                     laser.setCenterY(90.0f);
-//                    g.getAsteroidsModelSmall().remove(asteroids);
                     if (rand.nextInt(100) > 95) {
                         g.getMineralModel().add(g.getMinerals().get(g.getMineralModel().size()));
                         Sprite mineral = g.getMineralModel().get(g.getMineralModel().size() - 1);
@@ -473,7 +462,7 @@ public class GameActivity extends AppCompatActivity implements GLSurfaceView.Ren
         // Handle tap when game is over.
         if (g.getLives() < 1) {
             // Check for high score.
-            if (g.getScore() > g.getScores().get(g.getScores().size() - 1).getScore() || g.getScores().size() < 10) {
+            if (g.getScores().size() == 0 || g.getScore() > g.getScores().get(g.getScores().size() - 1).getScore() || g.getScores().size() < 10) {
                 //Spawn input form
                 final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
                 LayoutInflater li = LayoutInflater.from(this);
@@ -500,7 +489,11 @@ public class GameActivity extends AppCompatActivity implements GLSurfaceView.Ren
                             }
                         });
                 alertDialog = alertDialogBuilder.create();
-                alertDialog.show();
+                try {
+                    alertDialog.show();
+                } catch (Exception e) {
+
+                }
 
             } else {
                 // Go back to menu.
@@ -512,9 +505,7 @@ public class GameActivity extends AppCompatActivity implements GLSurfaceView.Ren
             }
         }
 
-
         List<Sprite> sprites = GameModel.getInstance(this).getBaseSprites();
-
 
         Sprite ship = GameModel.getInstance(this).getShip();
 
@@ -523,38 +514,30 @@ public class GameActivity extends AppCompatActivity implements GLSurfaceView.Ren
         Sprite thrust = sprites.get(2);
         Sprite shoot = sprites.get(3);
 
-
-
         float x = motionEvent.getX();
         float y = motionEvent.getY();
 
-        float rightArrowCenterY = ((rightArrow.getCenterY() - 1.0f) * -0.5f) * metrics.heightPixels;
+        int height = metrics.heightPixels - getSupportActionBar().getHeight();
+
+        float rightArrowCenterY = ((rightArrow.getCenterY() - 1.0f) * -0.5f) * height;
         float rightArrowCenterX = ((rightArrow.getCenterX() * ratio + 1.0f) * 0.5f) * metrics.widthPixels;
         float rightArrowWidth = rightArrow.getWidth() * metrics.widthPixels;
-        float rightArrowHeight = rightArrow.getHeight() * (metrics.heightPixels);
+        float rightArrowHeight = rightArrow.getHeight() * (height);
 
-        float leftArrowCenterY = ((leftArrow.getCenterY() - 1.0f) * -0.5f) * metrics.heightPixels;
+        float leftArrowCenterY = ((leftArrow.getCenterY() - 1.0f) * -0.5f) * height;
         float leftArrowCenterX = ((leftArrow.getCenterX() * ratio + 1.0f) * 0.5f) * metrics.widthPixels;
         float leftArrowWidth = leftArrow.getWidth() * metrics.widthPixels;
-        float leftArrowHeight = leftArrow.getHeight() * (metrics.heightPixels);
+        float leftArrowHeight = leftArrow.getHeight() * (height);
 
-        float thrustCenterY = ((thrust.getCenterY() - 1.0f) * -0.5f) * metrics.heightPixels;
+        float thrustCenterY = ((thrust.getCenterY() - 1.0f) * -0.5f) * height;
         float thrustCenterX = ((thrust.getCenterX() * ratio + 1.0f) * 0.5f) * metrics.widthPixels;
         float thrustWidth = thrust.getWidth() * metrics.widthPixels;
-        float thrustHeight = thrust.getHeight() * (metrics.heightPixels);
+        float thrustHeight = thrust.getHeight() * (height);
 
-        float shootCenterY = ((shoot.getCenterY() - 1.0f) * -0.5f) * metrics.heightPixels;
+        float shootCenterY = ((shoot.getCenterY() - 1.0f) * -0.5f) * height;
         float shootCenterX = ((shoot.getCenterX() * ratio + 1.0f) * 0.5f) * metrics.widthPixels;
         float shootWidth = shoot.getWidth() * metrics.widthPixels;
-        float shootHeight = shoot.getHeight() * metrics.heightPixels;
-
-        Log.i("A", "Click Y: " + motionEvent.getY());
-        Log.i("A", "shootCenterY: " + shootCenterY);
-        Log.i("A", "shoot.centerY: " + shoot.getCenterY());
-        Log.i("A", "shoot height: " + shootHeight);
-        Log.i("A", "shoot.getHeight: " + shoot.getHeight());
-
-
+        float shootHeight = shoot.getHeight() * height;
 
         boolean rightArrowPress = x >= rightArrowCenterX - rightArrowWidth/2 && x <= rightArrowCenterX + rightArrowWidth/2 && y >= rightArrowCenterY - rightArrowHeight/2 && y <= rightArrowCenterY + rightArrowHeight/2;
         boolean leftArrowPress = x >= leftArrowCenterX - leftArrowWidth/2 && x <= leftArrowCenterX + leftArrowWidth/2 && y >= leftArrowCenterY - leftArrowHeight/2 && y <= leftArrowCenterY + leftArrowHeight/2;

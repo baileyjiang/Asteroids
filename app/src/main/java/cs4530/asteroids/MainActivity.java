@@ -2,7 +2,6 @@ package cs4530.asteroids;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -32,7 +31,6 @@ public class MainActivity extends AppCompatActivity {
                 Intent newGameIntent = new Intent();
                 newGameIntent.setClass(MainActivity.this, GameActivity.class);
                 startActivity(newGameIntent);
-//                finish();
             }
         });
 

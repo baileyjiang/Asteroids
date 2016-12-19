@@ -60,13 +60,11 @@ public class GameModel {
     private GameModel() {
         ratio = ((float)context.getResources().getDisplayMetrics().heightPixels / (float)context.getResources().getDisplayMetrics().widthPixels);
 
-
         Sprite ship = new Sprite();
         ship.setWidth(0.25f);
         ship.setHeight(0.25f);
         ship.setTexture(BitmapFactory.decodeResource(context.getResources(), R.drawable.spaceship));
         this.ship = ship;
-
 
         for (int i = 0; i < 10; i++) {
             Sprite l = new Sprite();
@@ -75,7 +73,6 @@ public class GameModel {
             l.setCenterX(90.0f);
             l.setCenterY(90.0f);
             l.setTexture(BitmapFactory.decodeResource(context.getResources(), R.drawable.bullet));
-//            baseSprites.add(l);
             lasers.add(l);
         }
 
@@ -150,7 +147,6 @@ public class GameModel {
             mineral.setTexture(BitmapFactory.decodeResource(context.getResources(), R.drawable.mineral));
             minerals.add(mineral);
         }
-
 
         Sprite rightArrow = new Sprite();
         rightArrow.setWidth(0.25f);
@@ -240,12 +236,10 @@ public class GameModel {
         gameOver.setTexture(BitmapFactory.decodeResource(context.getResources(), R.drawable.game_over));
         baseSprites.add(gameOver);
 
-
         loadAll();
         loadScores();
 
         asteroidsModelBig = asteroidsBig.subList(0, level);
-
     }
 
     public List<Sprite> getBaseSprites() {
@@ -283,7 +277,6 @@ public class GameModel {
             }
         }
         return null;
-//        return lasers.get(0);
     }
 
     public Sprite getShip() {
@@ -367,7 +360,7 @@ public class GameModel {
             }
         });
         if (scores.size() > 10) {
-            scores = scores.subList(0, 9);
+            scores = scores.subList(0, 10);
         }
     }
 
