@@ -1,0 +1,8 @@
+Various sprites were pulled from sites. These sprites are not owned by me and are solely used for educational purposes.
+
+Asteroid sprites: http://freegameassets.blogspot.com/2013/09/asteroids-and-planets-if-you-needed-to.html.
+Bullet sprite: https://donaldcarling.wordpress.com/2016/03/#jp-carousel-391
+Spaceship sprite: http://arboris.deviantart.com/art/Spaceship-sprites-43030167
+Transparent arrow sprite: http://icons.mysitemyway.com/3d-transparent-glass-icons-arrows/
+
+All other sprites are either created by me or edited by me.
